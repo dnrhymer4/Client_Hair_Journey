@@ -20,9 +20,43 @@ import {
   Sparkles,
   Users,
   WalletCards,
+  BriefcaseBusiness,
+  Target,
+  TrendingUp,
+  UserRound,
 } from "lucide-react";
 
 type View = "mentor" | "mentee" | "client" | "admin";
+type MentorTab = "mentees" | "mentorClients";
+
+const mentees = [
+  {
+    name: "Kia",
+    market: "Atlanta",
+    niche: "Locs + protective styles",
+    revenue: "$4.1K",
+    goal: "$5K",
+    progress: 74,
+    clients: 47,
+    bookings: 32,
+    contentScore: 68,
+    status: "On track",
+    nextSession: "Jun 24",
+  },
+  {
+    name: "Maya",
+    market: "Charlotte",
+    niche: "Color + loc repair",
+    revenue: "$3.2K",
+    goal: "$4.5K",
+    progress: 58,
+    clients: 29,
+    bookings: 21,
+    contentScore: 45,
+    status: "Needs focus",
+    nextSession: "Jun 28",
+  },
+];
 
 const clients = [
   { name: "Layla M.", service: "Check-in & Photo Update", progress: 72, status: "Photo due", next: "May 28" },
@@ -31,7 +65,7 @@ const clients = [
   { name: "Maya L.", service: "Growth Plan", progress: 90, status: "Updated today", next: "May 31" },
 ];
 
-const timeline = [
+const clientTimeline = [
   { date: "Today", title: "Photo Update", body: "Front and back progress photos added." },
   { date: "Apr 30", title: "Deep Conditioning Treatment", body: "Hydration boost and trim completed." },
   { date: "Apr 16", title: "Color Refresh", body: "Gloss and root blend completed." },
@@ -44,11 +78,18 @@ const appointments = [
   { time: "4:00 PM", name: "Brianna T.", type: "Follow-up" },
 ];
 
-const plan = [
+const carePlan = [
   ["Hydration", "3x per week"],
   ["Protein", "1x per week"],
   ["Scalp Care", "Massage 2x per week"],
   ["Protect", "Heat protectant daily"],
+];
+
+const mentorTasks = [
+  "Review Kia’s pricing calculator",
+  "Give feedback on content plan",
+  "Confirm client retention workflow",
+  "Update next-session action plan",
 ];
 
 function Shell({ view, setView, children }: { view: View; setView: (view: View) => void; children: React.ReactNode }) {
@@ -90,8 +131,8 @@ function Shell({ view, setView, children }: { view: View; setView: (view: View) 
               <Crown className="h-5 w-5" />
             </div>
             <div>
-              <p className="font-bold">Steph B.</p>
-              <p className="text-xs text-[#b8a8a4]">Mentor / Loctitian</p>
+              <p className="font-bold">Mentor Account</p>
+              <p className="text-xs text-[#b8a8a4]">Coaching + client care</p>
             </div>
           </div>
         </div>
@@ -118,14 +159,14 @@ function Shell({ view, setView, children }: { view: View; setView: (view: View) 
               <Search className="absolute left-4 top-3.5 h-4 w-4 text-[#b8a8a4]" />
               <input
                 className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-[#76676a]"
-                placeholder="Search clients, appointments, notes..."
+                placeholder="Search mentees, clients, appointments, notes..."
               />
             </div>
 
             <div className="ml-auto flex items-center gap-3">
               <button className="rounded-2xl border border-[#ffb7c42e] bg-white/[0.04] px-4 py-2 text-sm font-bold text-[#fff7f4]">
                 <Plus className="mr-2 inline h-4 w-4" />
-                Add Client
+                Add Record
               </button>
               <button className="relative rounded-full border border-white/10 bg-white/[0.04] p-3">
                 <Bell className="h-4 w-4" />
@@ -208,6 +249,29 @@ function ClientRows() {
   );
 }
 
+function MenteeRows() {
+  return (
+    <div className="space-y-3">
+      {mentees.map((m) => (
+        <div key={m.name} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="font-black">{m.name} · {m.market}</p>
+              <p className="text-xs text-[#b8a8a4]">{m.niche} · Next session {m.nextSession}</p>
+            </div>
+            <span className="rounded-full bg-[#2a151a] px-3 py-1 text-xs font-black text-[#f1889e]">{m.status}</span>
+          </div>
+          <div className="mb-2 flex justify-between text-xs text-[#b8a8a4]">
+            <span>Business progress</span>
+            <span>{m.progress}%</span>
+          </div>
+          <ProgressBar value={m.progress} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function QuickActions() {
   const actions = [
     ["Send Message", MessageCircle],
@@ -230,12 +294,12 @@ function QuickActions() {
   );
 }
 
-function JourneyAndPlan() {
+function ClientJourneyAndPlan() {
   return (
     <div className="grid gap-5 xl:grid-cols-[1.4fr_.7fr]">
-      <Panel title="Journey Timeline">
+      <Panel title="Client Journey Timeline">
         <div className="space-y-3">
-          {timeline.map((t) => (
+          {clientTimeline.map((t) => (
             <div key={t.title} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
               <div className="mt-1 h-3 w-3 rounded-full bg-[#e66f8e] shadow-[0_0_20px_rgba(230,111,142,.8)]" />
               <div className="flex-1">
@@ -249,9 +313,9 @@ function JourneyAndPlan() {
         </div>
       </Panel>
 
-      <Panel title="Care Plan">
+      <Panel title="Client Care Plan">
         <div className="space-y-3">
-          {plan.map(([title, sub]) => (
+          {carePlan.map(([title, sub]) => (
             <div key={title} className="flex items-center gap-3 rounded-2xl bg-white/[0.035] p-4">
               <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#2a151a] text-[#f1889e]">
                 <Droplets className="h-5 w-5" />
@@ -268,19 +332,86 @@ function JourneyAndPlan() {
   );
 }
 
-function MentorView() {
+function MentorMenteeProgressView() {
+  const selectedMentee = mentees[0];
+
   return (
-    <div className="space-y-7">
-      <Hero title="Welcome back, Steph! ✨" subtitle="Here’s what needs your attention across clients, appointments, and journeys today." />
+    <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={Users} label="Active Clients" value="24" />
+        <Metric icon={Users} label="Active Mentees" value="12" />
+        <Metric icon={Target} label="Avg Goal Progress" value="74%" />
+        <Metric icon={BriefcaseBusiness} label="Mentee Clients" value="139" />
+        <Metric icon={TrendingUp} label="Avg Revenue Growth" value="18%" />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
+        <Panel title="Mentee Business Progress">
+          <MenteeRows />
+        </Panel>
+
+        <Panel title={`${selectedMentee.name}'s Business Snapshot`} action={false}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl bg-white/[0.035] p-4">
+              <p className="text-xs text-[#b8a8a4]">Revenue</p>
+              <p className="text-2xl font-black">{selectedMentee.revenue}</p>
+              <p className="text-xs text-[#b8a8a4]">Goal: {selectedMentee.goal}</p>
+            </div>
+            <div className="rounded-2xl bg-white/[0.035] p-4">
+              <p className="text-xs text-[#b8a8a4]">Bookings</p>
+              <p className="text-2xl font-black">{selectedMentee.bookings}</p>
+              <p className="text-xs text-[#b8a8a4]">Active clients: {selectedMentee.clients}</p>
+            </div>
+            <div className="rounded-2xl bg-white/[0.035] p-4">
+              <p className="text-xs text-[#b8a8a4]">Content Score</p>
+              <p className="text-2xl font-black">{selectedMentee.contentScore}%</p>
+              <ProgressBar value={selectedMentee.contentScore} />
+            </div>
+            <div className="rounded-2xl bg-white/[0.035] p-4">
+              <p className="text-xs text-[#b8a8a4]">Next Session</p>
+              <p className="text-2xl font-black">{selectedMentee.nextSession}</p>
+              <p className="text-xs text-[#b8a8a4]">Focus: pricing + retention</p>
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
+        <Panel title="Mentor Coaching Tasks">
+          {mentorTasks.map((task, i) => (
+            <div key={task} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
+              <span className="text-sm font-bold">{task}</span>
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 1}</span>
+            </div>
+          ))}
+        </Panel>
+
+        <Panel title="Business Growth Opportunities">
+          <div className="grid gap-4 md:grid-cols-3">
+            {["Raise starter loc pricing by $15", "Post 2 transformation reels", "Launch client journey check-ins"].map((item) => (
+              <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <Sparkles className="mb-3 h-5 w-5 text-[#f1889e]" />
+                <p className="font-bold">{item}</p>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function MentorClientManagementView() {
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={Users} label="Mentor's Active Clients" value="24" />
         <Metric icon={CalendarDays} label="Appointments Today" value="6" />
-        <Metric icon={CheckCircle2} label="Tasks Due This Week" value="14" />
-        <Metric icon={LineChart} label="Average Progress" value="87%" />
+        <Metric icon={CheckCircle2} label="Client Tasks Due" value="14" />
+        <Metric icon={LineChart} label="Avg Client Progress" value="87%" />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr_.9fr]">
-        <Panel title="Today’s Schedule">
+        <Panel title="Mentor's Client Schedule">
           <div className="space-y-3">
             {appointments.map((a) => (
               <div key={a.time} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -298,12 +429,46 @@ function MentorView() {
           <ClientRows />
         </Panel>
 
-        <Panel title="Quick Actions" action={false}>
+        <Panel title="Quick Client Actions" action={false}>
           <QuickActions />
         </Panel>
       </div>
 
-      <JourneyAndPlan />
+      <ClientJourneyAndPlan />
+    </div>
+  );
+}
+
+function MentorView() {
+  const [tab, setTab] = useState<MentorTab>("mentees");
+
+  return (
+    <div className="space-y-7">
+      <Hero
+        title="Mentor HQ"
+        subtitle="Coach mentees on business growth, while also managing the mentor’s own direct clients when needed."
+      />
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={() => setTab("mentees")}
+          className={`rounded-2xl px-5 py-3 text-sm font-black ${
+            tab === "mentees" ? "bg-[#e66f8e] text-white" : "border border-white/10 bg-white/[0.04] text-[#b8a8a4]"
+          }`}
+        >
+          Mentee Business Progress
+        </button>
+        <button
+          onClick={() => setTab("mentorClients")}
+          className={`rounded-2xl px-5 py-3 text-sm font-black ${
+            tab === "mentorClients" ? "bg-[#e66f8e] text-white" : "border border-white/10 bg-white/[0.04] text-[#b8a8a4]"
+          }`}
+        >
+          Mentor’s Client Management
+        </button>
+      </div>
+
+      {tab === "mentees" ? <MentorMenteeProgressView /> : <MentorClientManagementView />}
     </div>
   );
 }
@@ -311,7 +476,7 @@ function MentorView() {
 function MenteeView() {
   return (
     <div className="space-y-7">
-      <Hero title="Business Dashboard" subtitle="A clean operating view for bookings, clients, content, products, and follow-ups." />
+      <Hero title="Mentee Business Dashboard" subtitle="A clean operating view for bookings, clients, content, products, and follow-ups." />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric icon={WalletCards} label="Monthly Revenue" value="$4.1K" />
         <Metric icon={CalendarDays} label="Booked Appts" value="56" />
@@ -320,10 +485,10 @@ function MenteeView() {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
-        <Panel title="Clients Overview">
+        <Panel title="Mentee's Clients">
           <ClientRows />
         </Panel>
-        <Panel title="Tasks Due">
+        <Panel title="Business Tasks Due">
           {["Review photo updates", "Follow up with clients", "Update care plans", "Check-in reminders"].map((t, i) => (
             <div key={t} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
               <span className="text-sm font-bold">{t}</span>
@@ -332,17 +497,6 @@ function MenteeView() {
           ))}
         </Panel>
       </div>
-
-      <Panel title="Content + Client Growth Priorities">
-        <div className="grid gap-4 md:grid-cols-3">
-          {["Post 2 transformation reels", "Add 5 client progress photos", "Send wash-day reminders"].map((x) => (
-            <div key={x} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-              <Sparkles className="mb-3 h-5 w-5 text-[#f1889e]" />
-              <p className="font-bold">{x}</p>
-            </div>
-          ))}
-        </div>
-      </Panel>
     </div>
   );
 }
@@ -350,7 +504,7 @@ function MenteeView() {
 function ClientView() {
   return (
     <div className="space-y-7">
-      <Hero title="Hey, Layla! 👋" subtitle="Your hair journey is on track. Here’s your progress, next appointment, and care plan." />
+      <Hero title="Hey, Layla! 👋" subtitle="Your individual hair journey, appointment plan, care routine, and progress history." />
       <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
         <Panel title="Your Progress Overview">
           <div className="mb-4 flex items-end justify-between">
@@ -373,7 +527,7 @@ function ClientView() {
         </Panel>
       </div>
 
-      <JourneyAndPlan />
+      <ClientJourneyAndPlan />
 
       <Panel title="Recent Photos">
         <div className="grid gap-4 sm:grid-cols-3">
@@ -397,13 +551,13 @@ function AdminView() {
       <Hero title="Admin Dashboard" subtitle="Platform-level usage, bookings, revenue, retention, and user activity." />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric icon={Users} label="Total Users" value="52" />
-        <Metric icon={Users} label="Active Clients" value="38" />
+        <Metric icon={UserRound} label="Clients" value="38" />
         <Metric icon={Crown} label="Mentors" value="6" />
         <Metric icon={WalletCards} label="Total Revenue" value="$6.8K" />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
-        <Panel title="Analytics Overview">
+        <Panel title="Platform Overview">
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
             <p className="text-5xl font-black text-[#f1889e]">72%</p>
             <p className="mt-2 text-[#b8a8a4]">Average client journey progress</p>
