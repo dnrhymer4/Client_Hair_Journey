@@ -87,7 +87,7 @@ export default function AdminView({ openModal }: { openModal: ModalOpener }) {
               </defs>
               <Area type="monotone" dataKey="revenue" stroke="#e66f8e" fill="url(#grad-admin)" strokeWidth={2.5} dot={false} />
               <Tooltip
-                formatter={(v: number) => [`$${v.toLocaleString()}`, "Revenue"]}
+                formatter={(v) => [`$${Number(v).toLocaleString()}`, "Revenue"]}
                 contentStyle={{ background: "#111010", border: "1px solid #ff8fab33", borderRadius: 8, fontSize: 12 }}
               />
               <XAxis dataKey="week" tick={{ fill: "#76676a", fontSize: 10 }} tickLine={false} axisLine={false} />
