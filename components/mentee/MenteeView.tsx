@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   CalendarDays, Users, WalletCards, Eye, ChevronRight,
   Target, TrendingUp, BriefcaseBusiness, CheckSquare, Square,
-  Plus, Instagram, Globe, Globe2, Megaphone,
+  Plus, Globe, GlobeLock, Megaphone,
 } from "lucide-react";
 import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
 import {
