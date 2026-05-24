@@ -1,6 +1,4 @@
-Replace your entire lucide-react import block with this:
 
-```tsx
 import {
   Bell,
   CalendarDays,
@@ -76,4 +74,3 @@ const socials = [
     views: "1.7K",
   },
 ];
-```
