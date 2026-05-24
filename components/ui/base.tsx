@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Globe, Globe2, CalendarDays, TrendingUp, TrendingDown } from "lucide-react";
+import { ExternalLink, Globe, GlobeLock, CalendarDays, TrendingUp, TrendingDown } from "lucide-react";
 import { Social, delta } from "@/lib/demoData";
 
 // ── Metric card with real delta ──────────────────
@@ -177,7 +177,7 @@ export function StatusBadge({ status }: { status: string }) {
 export function SocialList({ socials, showClientLinks }: { socials: Social[]; showClientLinks?: boolean }) {
   const iconMap: Record<string, React.ElementType> = {
     Instagram: Globe,
-    Facebook: Globe2,
+    Facebook: GlobeLock,
     TikTok: Globe,
     Booking: CalendarDays,
   };
