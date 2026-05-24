@@ -24,10 +24,34 @@ import {
   Target,
   TrendingUp,
   UserRound,
+  X,
+  ClipboardList,
 } from "lucide-react";
 
 type View = "mentor" | "mentee" | "client" | "admin";
 type MentorTab = "mentees" | "mentorClients";
+type ModalState =
+  | null
+  | {
+      title: string;
+      type: "add" | "view";
+      body: string;
+    };
+
+const progressFormula = [
+  { label: "Appointment consistency", weight: 30, score: 80, description: "Attends scheduled appointments and completes check-ins." },
+  { label: "Photo/check-in updates", weight: 25, score: 72, description: "Progress photos and stylist check-ins are current." },
+  { label: "Care plan completion", weight: 20, score: 70, description: "Hydration, scalp care, and protection plan followed." },
+  { label: "Wash-day tracking", weight: 15, score: 60, description: "Wash days are logged with scalp and product notes." },
+  { label: "Product/routine adherence", weight: 10, score: 78, description: "Recommended products are used; avoid list is followed." },
+];
+
+function calculateProgress() {
+  const weighted = progressFormula.reduce((sum, item) => sum + item.score * (item.weight / 100), 0);
+  return Math.round(weighted);
+}
+
+const overallProgress = calculateProgress();
 
 const mentees = [
   {
@@ -59,7 +83,7 @@ const mentees = [
 ];
 
 const clients = [
-  { name: "Layla M.", service: "Check-in & Photo Update", progress: 72, status: "Photo due", next: "May 28" },
+  { name: "Layla M.", service: "Check-in & Photo Update", progress: overallProgress, status: "Photo due", next: "May 28" },
   { name: "Jasmine R.", service: "Color Correction Plan", progress: 58, status: "Needs review", next: "May 30" },
   { name: "Brianna T.", service: "Maintenance Plan", progress: 81, status: "Plan completed", next: "May 27" },
   { name: "Maya L.", service: "Growth Plan", progress: 90, status: "Updated today", next: "May 31" },
@@ -92,7 +116,7 @@ const mentorTasks = [
   "Update next-session action plan",
 ];
 
-function Shell({ view, setView, children }: { view: View; setView: (view: View) => void; children: React.ReactNode }) {
+function Shell({ view, setView, children, openModal }: { view: View; setView: (view: View) => void; children: React.ReactNode; openModal: (modal: ModalState) => void }) {
   const nav = [
     ["mentor", "Mentor", Home],
     ["mentee", "Mentee", Users],
@@ -164,7 +188,16 @@ function Shell({ view, setView, children }: { view: View; setView: (view: View) 
             </div>
 
             <div className="ml-auto flex items-center gap-3">
-              <button className="rounded-2xl border border-[#ffb7c42e] bg-white/[0.04] px-4 py-2 text-sm font-bold text-[#fff7f4]">
+              <button
+                onClick={() =>
+                  openModal({
+                    title: "Add Record",
+                    type: "add",
+                    body: "Choose what you want to add: mentee, client, appointment, wash-day log, progress photo, care note, product entry, coaching session, or business goal.",
+                  })
+                }
+                className="rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] px-4 py-2 text-sm font-black text-white shadow-[0_0_30px_rgba(230,111,142,.3)]"
+              >
                 <Plus className="mr-2 inline h-4 w-4" />
                 Add Record
               </button>
@@ -179,6 +212,103 @@ function Shell({ view, setView, children }: { view: View; setView: (view: View) 
         <div className="mx-auto max-w-[1500px] p-4 md:p-8">{children}</div>
       </section>
     </main>
+  );
+}
+
+function AppModal({ modal, close }: { modal: ModalState; close: () => void }) {
+  if (!modal) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl rounded-[2rem] border border-[#ffb7c42e] bg-[#111010] p-6 shadow-[0_30px_100px_rgba(0,0,0,.75)]">
+        <div className="mb-5 flex items-start justify-between gap-4">
+          <div>
+            <p className="mb-2 inline-flex rounded-full bg-[#2a151a] px-3 py-1 text-xs font-black uppercase tracking-[.2em] text-[#f1889e]">
+              {modal.type === "add" ? "Action" : "Details"}
+            </p>
+            <h2 className="text-3xl font-black">{modal.title}</h2>
+            <p className="mt-2 text-sm leading-6 text-[#b8a8a4]">{modal.body}</p>
+          </div>
+          <button onClick={close} className="rounded-full border border-white/10 bg-white/[0.04] p-3">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {modal.type === "add" ? <AddRecordOptions /> : <ViewDetailsContent title={modal.title} />}
+
+        <button onClick={close} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] py-3 font-black">
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AddRecordOptions() {
+  const options = [
+    ["Mentee", Users],
+    ["Client", UserRound],
+    ["Appointment", CalendarDays],
+    ["Wash Day", Droplets],
+    ["Progress Photo", Camera],
+    ["Care Note", FileText],
+    ["Product Entry", PackageCheck],
+    ["Coaching Session", ClipboardList],
+  ] as const;
+
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+      {options.map(([label, Icon]) => (
+        <button key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-[#2a151a]">
+          <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
+          <p className="text-sm font-black">{label}</p>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function ViewDetailsContent({ title }: { title: string }) {
+  if (title.toLowerCase().includes("progress")) {
+    return <ProgressBreakdown />;
+  }
+
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
+      <p className="text-sm leading-6 text-[#b8a8a4]">
+        This is where the full list/detail view will go once connected to Supabase. For now, the button confirms the navigation behavior and gives you a clear place to wire real records.
+      </p>
+    </div>
+  );
+}
+
+function ProgressBreakdown() {
+  return (
+    <div className="space-y-3">
+      <div className="rounded-3xl border border-[#e66f8e]/25 bg-[#241218] p-5">
+        <p className="text-sm text-[#b8a8a4]">Overall Progress Score</p>
+        <p className="mt-1 text-5xl font-black">{overallProgress}%</p>
+        <p className="mt-2 text-sm leading-6 text-[#b8a8a4]">
+          The score is a weighted client journey score. Each category contributes to the 100% total.
+        </p>
+      </div>
+
+      {progressFormula.map((item) => (
+        <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div>
+              <p className="font-black">{item.label}</p>
+              <p className="text-xs text-[#b8a8a4]">{item.description}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-black text-[#f1889e]">{item.score}%</p>
+              <p className="text-xs text-[#b8a8a4]">Weight {item.weight}%</p>
+            </div>
+          </div>
+          <ProgressBar value={item.score} />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -197,12 +327,26 @@ function Metric({ icon: Icon, label, value }: { icon: any; label: string; value:
   );
 }
 
-function Panel({ title, children, action = true }: { title: string; children: React.ReactNode; action?: boolean }) {
+function Panel({
+  title,
+  children,
+  action = true,
+  onViewAll,
+}: {
+  title: string;
+  children: React.ReactNode;
+  action?: boolean;
+  onViewAll?: () => void;
+}) {
   return (
     <section className="rounded-3xl border border-white/10 bg-[#111010]/80 p-5 shadow-[0_25px_80px_rgba(0,0,0,.38)] backdrop-blur-xl">
       <div className="mb-5 flex items-center justify-between">
         <h2 className="text-lg font-black">{title}</h2>
-        {action && <button className="text-xs font-bold text-[#f1889e]">View all</button>}
+        {action && (
+          <button onClick={onViewAll} className="rounded-full px-3 py-1 text-xs font-bold text-[#f1889e] hover:bg-[#2a151a]">
+            View all
+          </button>
+        )}
       </div>
       {children}
     </section>
@@ -250,6 +394,25 @@ function ClientRows() {
 }
 
 function MenteeRows() {
+  const mentees = [
+    {
+      name: "Kia",
+      market: "Atlanta",
+      niche: "Locs + protective styles",
+      progress: 74,
+      status: "On track",
+      nextSession: "Jun 24",
+    },
+    {
+      name: "Maya",
+      market: "Charlotte",
+      niche: "Color + loc repair",
+      progress: 58,
+      status: "Needs focus",
+      nextSession: "Jun 28",
+    },
+  ];
+
   return (
     <div className="space-y-3">
       {mentees.map((m) => (
@@ -272,7 +435,7 @@ function MenteeRows() {
   );
 }
 
-function QuickActions() {
+function QuickActions({ openModal }: { openModal: (modal: ModalState) => void }) {
   const actions = [
     ["Send Message", MessageCircle],
     ["Upload Photo", ImagePlus],
@@ -285,7 +448,17 @@ function QuickActions() {
   return (
     <div className="grid grid-cols-2 gap-3">
       {actions.map(([label, Icon]) => (
-        <button key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-[#2a151a]">
+        <button
+          key={label}
+          onClick={() =>
+            openModal({
+              title: label,
+              type: "add",
+              body: `Start the ${label.toLowerCase()} workflow. This will later connect to the correct Supabase form/table.`,
+            })
+          }
+          className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-[#2a151a]"
+        >
           <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
           <p className="text-xs font-black">{label}</p>
         </button>
@@ -294,10 +467,19 @@ function QuickActions() {
   );
 }
 
-function ClientJourneyAndPlan() {
+function ClientJourneyAndPlan({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="grid gap-5 xl:grid-cols-[1.4fr_.7fr]">
-      <Panel title="Client Journey Timeline">
+      <Panel
+        title="Client Journey Timeline"
+        onViewAll={() =>
+          openModal({
+            title: "Client Journey Timeline",
+            type: "view",
+            body: "Full individual client timeline: loc start date, appointments, wash days, product changes, photo updates, scalp notes, and care milestones.",
+          })
+        }
+      >
         <div className="space-y-3">
           {clientTimeline.map((t) => (
             <div key={t.title} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -313,7 +495,16 @@ function ClientJourneyAndPlan() {
         </div>
       </Panel>
 
-      <Panel title="Client Care Plan">
+      <Panel
+        title="Client Care Plan"
+        onViewAll={() =>
+          openModal({
+            title: "Client Care Plan",
+            type: "view",
+            body: "Full care plan: hydration, protein, scalp care, product recommendations, avoid list, and recommended service cadence.",
+          })
+        }
+      >
         <div className="space-y-3">
           {carePlan.map(([title, sub]) => (
             <div key={title} className="flex items-center gap-3 rounded-2xl bg-white/[0.035] p-4">
@@ -332,9 +523,7 @@ function ClientJourneyAndPlan() {
   );
 }
 
-function MentorMenteeProgressView() {
-  const selectedMentee = mentees[0];
-
+function MentorMenteeProgressView({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -345,38 +534,40 @@ function MentorMenteeProgressView() {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-        <Panel title="Mentee Business Progress">
+        <Panel
+          title="Mentee Business Progress"
+          onViewAll={() =>
+            openModal({
+              title: "Mentee Business Progress",
+              type: "view",
+              body: "Full mentee list with business stage, goals, revenue, bookings, clients, content score, next session, and coaching priorities.",
+            })
+          }
+        >
           <MenteeRows />
         </Panel>
 
-        <Panel title={`${selectedMentee.name}'s Business Snapshot`} action={false}>
+        <Panel title="Kia's Business Snapshot" action={false}>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white/[0.035] p-4">
-              <p className="text-xs text-[#b8a8a4]">Revenue</p>
-              <p className="text-2xl font-black">{selectedMentee.revenue}</p>
-              <p className="text-xs text-[#b8a8a4]">Goal: {selectedMentee.goal}</p>
-            </div>
-            <div className="rounded-2xl bg-white/[0.035] p-4">
-              <p className="text-xs text-[#b8a8a4]">Bookings</p>
-              <p className="text-2xl font-black">{selectedMentee.bookings}</p>
-              <p className="text-xs text-[#b8a8a4]">Active clients: {selectedMentee.clients}</p>
-            </div>
-            <div className="rounded-2xl bg-white/[0.035] p-4">
-              <p className="text-xs text-[#b8a8a4]">Content Score</p>
-              <p className="text-2xl font-black">{selectedMentee.contentScore}%</p>
-              <ProgressBar value={selectedMentee.contentScore} />
-            </div>
-            <div className="rounded-2xl bg-white/[0.035] p-4">
-              <p className="text-xs text-[#b8a8a4]">Next Session</p>
-              <p className="text-2xl font-black">{selectedMentee.nextSession}</p>
-              <p className="text-xs text-[#b8a8a4]">Focus: pricing + retention</p>
-            </div>
+            <Snapshot label="Revenue" value="$4.1K" sub="Goal: $5K" />
+            <Snapshot label="Bookings" value="32" sub="Active clients: 47" />
+            <Snapshot label="Content Score" value="68%" sub="Needs consistency" />
+            <Snapshot label="Next Session" value="Jun 24" sub="Pricing + retention" />
           </div>
         </Panel>
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
-        <Panel title="Mentor Coaching Tasks">
+        <Panel
+          title="Mentor Coaching Tasks"
+          onViewAll={() =>
+            openModal({
+              title: "Mentor Coaching Tasks",
+              type: "view",
+              body: "Full task board for mentor follow-ups, assignments, due dates, session prep, and mentee accountability.",
+            })
+          }
+        >
           {mentorTasks.map((task, i) => (
             <div key={task} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
               <span className="text-sm font-bold">{task}</span>
@@ -385,7 +576,16 @@ function MentorMenteeProgressView() {
           ))}
         </Panel>
 
-        <Panel title="Business Growth Opportunities">
+        <Panel
+          title="Business Growth Opportunities"
+          onViewAll={() =>
+            openModal({
+              title: "Business Growth Opportunities",
+              type: "view",
+              body: "Full opportunity feed based on pricing, competitor trends, booking patterns, content performance, and retention signals.",
+            })
+          }
+        >
           <div className="grid gap-4 md:grid-cols-3">
             {["Raise starter loc pricing by $15", "Post 2 transformation reels", "Launch client journey check-ins"].map((item) => (
               <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -400,18 +600,37 @@ function MentorMenteeProgressView() {
   );
 }
 
-function MentorClientManagementView() {
+function Snapshot({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="rounded-2xl bg-white/[0.035] p-4">
+      <p className="text-xs text-[#b8a8a4]">{label}</p>
+      <p className="text-2xl font-black">{value}</p>
+      <p className="text-xs text-[#b8a8a4]">{sub}</p>
+    </div>
+  );
+}
+
+function MentorClientManagementView({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="space-y-5">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Metric icon={Users} label="Mentor's Active Clients" value="24" />
         <Metric icon={CalendarDays} label="Appointments Today" value="6" />
         <Metric icon={CheckCircle2} label="Client Tasks Due" value="14" />
-        <Metric icon={LineChart} label="Avg Client Progress" value="87%" />
+        <Metric icon={LineChart} label="Avg Client Progress" value={`${overallProgress}%`} />
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr_.9fr]">
-        <Panel title="Mentor's Client Schedule">
+        <Panel
+          title="Mentor's Client Schedule"
+          onViewAll={() =>
+            openModal({
+              title: "Mentor's Client Schedule",
+              type: "view",
+              body: "Full calendar view for the mentor’s own direct clients.",
+            })
+          }
+        >
           <div className="space-y-3">
             {appointments.map((a) => (
               <div key={a.time} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4">
@@ -419,28 +638,48 @@ function MentorClientManagementView() {
                   <p className="text-sm font-black">{a.time} · {a.name}</p>
                   <p className="text-xs text-[#b8a8a4]">{a.type}</p>
                 </div>
-                <button className="rounded-full border border-[#e66f8e]/40 px-3 py-1 text-xs font-bold text-[#f1889e]">Check-in</button>
+                <button
+                  onClick={() =>
+                    openModal({
+                      title: `${a.name} Check-in`,
+                      type: "add",
+                      body: "Open the client check-in workflow: add notes, upload photos, update care plan, and schedule the next appointment.",
+                    })
+                  }
+                  className="rounded-full border border-[#e66f8e]/40 px-3 py-1 text-xs font-bold text-[#f1889e]"
+                >
+                  Check-in
+                </button>
               </div>
             ))}
           </div>
         </Panel>
 
-        <Panel title="Recent Client Activity">
+        <Panel
+          title="Recent Client Activity"
+          onViewAll={() =>
+            openModal({
+              title: "Recent Client Activity",
+              type: "view",
+              body: "Full recent client activity feed for direct clients.",
+            })
+          }
+        >
           <ClientRows />
         </Panel>
 
         <Panel title="Quick Client Actions" action={false}>
-          <QuickActions />
+          <QuickActions openModal={openModal} />
         </Panel>
       </div>
 
-      <ClientJourneyAndPlan />
+      <ClientJourneyAndPlan openModal={openModal} />
     </div>
   );
 }
 
-function MentorView() {
-  const [tab, setTab] = useState<MentorTab>("mentees");
+function MentorView({ openModal }: { openModal: (modal: ModalState) => void }) {
+  const [tab, setTab] = useState<"mentees" | "mentorClients">("mentees");
 
   return (
     <div className="space-y-7">
@@ -468,12 +707,12 @@ function MentorView() {
         </button>
       </div>
 
-      {tab === "mentees" ? <MentorMenteeProgressView /> : <MentorClientManagementView />}
+      {tab === "mentees" ? <MentorMenteeProgressView openModal={openModal} /> : <MentorClientManagementView openModal={openModal} />}
     </div>
   );
 }
 
-function MenteeView() {
+function MenteeView({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="space-y-7">
       <Hero title="Mentee Business Dashboard" subtitle="A clean operating view for bookings, clients, content, products, and follow-ups." />
@@ -485,10 +724,28 @@ function MenteeView() {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
-        <Panel title="Mentee's Clients">
+        <Panel
+          title="Mentee's Clients"
+          onViewAll={() =>
+            openModal({
+              title: "Mentee's Clients",
+              type: "view",
+              body: "Full client list owned by the mentee.",
+            })
+          }
+        >
           <ClientRows />
         </Panel>
-        <Panel title="Business Tasks Due">
+        <Panel
+          title="Business Tasks Due"
+          onViewAll={() =>
+            openModal({
+              title: "Business Tasks Due",
+              type: "view",
+              body: "Full task list for the mentee dashboard.",
+            })
+          }
+        >
           {["Review photo updates", "Follow up with clients", "Update care plans", "Check-in reminders"].map((t, i) => (
             <div key={t} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
               <span className="text-sm font-bold">{t}</span>
@@ -501,20 +758,40 @@ function MenteeView() {
   );
 }
 
-function ClientView() {
+function ClientView({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="space-y-7">
       <Hero title="Hey, Layla! 👋" subtitle="Your individual hair journey, appointment plan, care routine, and progress history." />
       <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-        <Panel title="Your Progress Overview">
+        <Panel
+          title="Your Progress Overview"
+          onViewAll={() =>
+            openModal({
+              title: "Progress Overview",
+              type: "view",
+              body: "The progress score is calculated from appointment consistency, photo/check-in updates, care plan completion, wash-day tracking, and product/routine adherence.",
+            })
+          }
+        >
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <p className="text-5xl font-black">72%</p>
-              <p className="text-sm text-[#b8a8a4]">Overall progress · +8% this month</p>
+              <p className="text-5xl font-black">{overallProgress}%</p>
+              <p className="text-sm text-[#b8a8a4]">Weighted journey progress score</p>
             </div>
-            <Sparkles className="h-8 w-8 text-[#dca669]" />
+            <button
+              onClick={() =>
+                openModal({
+                  title: "Progress Overview",
+                  type: "view",
+                  body: "The progress score is calculated from appointment consistency, photo/check-in updates, care plan completion, wash-day tracking, and product/routine adherence.",
+                })
+              }
+              className="rounded-full border border-[#e66f8e]/40 px-3 py-2 text-xs font-bold text-[#f1889e]"
+            >
+              What counts?
+            </button>
           </div>
-          <ProgressBar value={72} />
+          <ProgressBar value={overallProgress} />
         </Panel>
 
         <Panel title="Next Appointment">
@@ -522,14 +799,34 @@ function ClientView() {
             <p className="text-sm text-[#b8a8a4]">May 28, 2025 · 10:00 AM</p>
             <p className="mt-2 text-2xl font-black">Check-in & Photo Update</p>
             <p className="mt-2 text-sm text-[#b8a8a4]">Front/back photos, scalp notes, and maintenance plan updates.</p>
-            <button className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] py-3 font-black">View Details</button>
+            <button
+              onClick={() =>
+                openModal({
+                  title: "Next Appointment",
+                  type: "view",
+                  body: "Appointment detail view with service type, preparation notes, intake questions, payment status, and reschedule options.",
+                })
+              }
+              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] py-3 font-black"
+            >
+              View Details
+            </button>
           </div>
         </Panel>
       </div>
 
-      <ClientJourneyAndPlan />
+      <ClientJourneyAndPlan openModal={openModal} />
 
-      <Panel title="Recent Photos">
+      <Panel
+        title="Recent Photos"
+        onViewAll={() =>
+          openModal({
+            title: "Recent Photos",
+            type: "view",
+            body: "Full progress photo gallery with dates, captions, and photo type.",
+          })
+        }
+      >
         <div className="grid gap-4 sm:grid-cols-3">
           {["Starter locs", "Budding phase", "Current progress"].map((label) => (
             <div key={label} className="grid aspect-[4/3] place-items-center rounded-3xl border border-dashed border-[#ffb7c42e] bg-white/[0.04]">
@@ -545,7 +842,7 @@ function ClientView() {
   );
 }
 
-function AdminView() {
+function AdminView({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="space-y-7">
       <Hero title="Admin Dashboard" subtitle="Platform-level usage, bookings, revenue, retention, and user activity." />
@@ -557,14 +854,32 @@ function AdminView() {
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
-        <Panel title="Platform Overview">
+        <Panel
+          title="Platform Overview"
+          onViewAll={() =>
+            openModal({
+              title: "Platform Overview",
+              type: "view",
+              body: "Full platform analytics dashboard.",
+            })
+          }
+        >
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <p className="text-5xl font-black text-[#f1889e]">72%</p>
+            <p className="text-5xl font-black text-[#f1889e]">{overallProgress}%</p>
             <p className="mt-2 text-[#b8a8a4]">Average client journey progress</p>
-            <div className="mt-5"><ProgressBar value={72} /></div>
+            <div className="mt-5"><ProgressBar value={overallProgress} /></div>
           </div>
         </Panel>
-        <Panel title="Recent Activity">
+        <Panel
+          title="Recent Activity"
+          onViewAll={() =>
+            openModal({
+              title: "Recent Activity",
+              type: "view",
+              body: "Full admin activity log.",
+            })
+          }
+        >
           {["New client signed up", "Payment received", "Appointment booked", "New mentor added"].map((x, i) => (
             <div key={x} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
               <span className="text-sm font-bold">{x}</span>
@@ -579,13 +894,21 @@ function AdminView() {
 
 export default function DarkDashboard({ initialView = "mentor" }: { initialView?: View }) {
   const [view, setView] = useState<View>(initialView);
+  const [modal, setModal] = useState<ModalState>(null);
 
   const content = useMemo(() => {
-    if (view === "mentor") return <MentorView />;
-    if (view === "mentee") return <MenteeView />;
-    if (view === "client") return <ClientView />;
-    return <AdminView />;
+    if (view === "mentor") return <MentorView openModal={setModal} />;
+    if (view === "mentee") return <MenteeView openModal={setModal} />;
+    if (view === "client") return <ClientView openModal={setModal} />;
+    return <AdminView openModal={setModal} />;
   }, [view]);
 
-  return <Shell view={view} setView={setView}>{content}</Shell>;
+  return (
+    <>
+      <Shell view={view} setView={setView} openModal={setModal}>
+        {content}
+      </Shell>
+      <AppModal modal={modal} close={() => setModal(null)} />
+    </>
+  );
 }
