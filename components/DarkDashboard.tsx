@@ -139,8 +139,8 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
               onClick={() => setView(id)}
               className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
                 view === id
-                  ? "bg-gradient-to-r from-[#8d4052] to-[#c65d76] text-white shadow-[0_0_30px_rgba(230,111,142,.24)]"
-                  : "text-[#b8a8a4] hover:bg-white/5 hover:text-white"
+                  ? "bg-gradient-to-r from-[#f1889e] to-[#dca669] text-[#17090d] shadow-[0_0_30px_rgba(230,111,142,.24)]"
+                  : "text-[#b8a8a4] hover:bg-[#251319] hover:text-[#ffd6de]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -149,7 +149,7 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
           ))}
         </nav>
 
-        <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+        <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-[#ff8fab33] bg-[#171112] p-4">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-[#2a151a] text-[#f7a0af]">
               <Crown className="h-5 w-5" />
@@ -171,7 +171,7 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
                   key={id}
                   onClick={() => setView(id)}
                   className={`rounded-full px-3 py-2 text-xs font-bold ${
-                    view === id ? "bg-[#e66f8e] text-white" : "bg-white/5 text-[#b8a8a4]"
+                    view === id ? "bg-[#f1889e] text-[#17090d]" : "bg-[#171112] text-[#f3b4c1]"
                   }`}
                 >
                   {label}
@@ -182,7 +182,7 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
             <div className="relative hidden w-full max-w-md md:block">
               <Search className="absolute left-4 top-3.5 h-4 w-4 text-[#b8a8a4]" />
               <input
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-[#76676a]"
+                className="w-full rounded-2xl border border-[#ff8fab33] bg-[#171112] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-[#76676a]"
                 placeholder="Search mentees, clients, appointments, notes..."
               />
             </div>
@@ -196,12 +196,12 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
                     body: "Choose what you want to add: mentee, client, appointment, wash-day log, progress photo, care note, product entry, coaching session, or business goal.",
                   })
                 }
-                className="rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] px-4 py-2 text-sm font-black text-white shadow-[0_0_30px_rgba(230,111,142,.3)]"
+                className="rounded-2xl bg-gradient-to-r from-[#f1889e] to-[#dca669] px-4 py-2 text-sm font-black text-[#17090d] shadow-[0_0_30px_rgba(230,111,142,.3)]"
               >
                 <Plus className="mr-2 inline h-4 w-4" />
                 Add Record
               </button>
-              <button className="relative rounded-full border border-white/10 bg-white/[0.04] p-3">
+              <button className="relative rounded-full border border-[#ff8fab33] bg-[#171112] p-3">
                 <Bell className="h-4 w-4" />
                 <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#e66f8e] text-xs font-bold">3</span>
               </button>
@@ -229,14 +229,14 @@ function AppModal({ modal, close }: { modal: ModalState; close: () => void }) {
             <h2 className="text-3xl font-black">{modal.title}</h2>
             <p className="mt-2 text-sm leading-6 text-[#b8a8a4]">{modal.body}</p>
           </div>
-          <button onClick={close} className="rounded-full border border-white/10 bg-white/[0.04] p-3">
-            <X className="h-5 w-5" />
+          <button onClick={close} className="rounded-full border border-[#ff8fab33] bg-[#171112] p-3">
+            <X className="h-5 w-5 text-[#f1889e]" />
           </button>
         </div>
 
         {modal.type === "add" ? <AddRecordOptions /> : <ViewDetailsContent title={modal.title} />}
 
-        <button onClick={close} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] py-3 font-black">
+        <button onClick={close} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#f1889e] to-[#dca669] py-3 font-black text-[#17090d]">
           Close
         </button>
       </div>
@@ -259,7 +259,7 @@ function AddRecordOptions() {
   return (
     <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
       {options.map(([label, Icon]) => (
-        <button key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-[#2a151a]">
+        <button key={label} className="rounded-2xl border border-[#ff8fab33] bg-[#171112] p-4 text-left transition hover:bg-[#2a151a]">
           <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
           <p className="text-sm font-black">{label}</p>
         </button>
@@ -274,7 +274,7 @@ function ViewDetailsContent({ title }: { title: string }) {
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
+    <div className="rounded-3xl border border-[#ff8fab33] bg-[#151011] p-5">
       <p className="text-sm leading-6 text-[#b8a8a4]">
         This is where the full list/detail view will go once connected to Supabase. For now, the button confirms the navigation behavior and gives you a clear place to wire real records.
       </p>
@@ -294,7 +294,7 @@ function ProgressBreakdown() {
       </div>
 
       {progressFormula.map((item) => (
-        <div key={item.label} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+        <div key={item.label} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
           <div className="mb-2 flex items-center justify-between gap-3">
             <div>
               <p className="font-black">{item.label}</p>
@@ -378,7 +378,7 @@ function ClientRows() {
   return (
     <div className="space-y-3">
       {clients.map((c) => (
-        <div key={c.name} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+        <div key={c.name} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
           <div className="mb-3 flex items-center justify-between">
             <div>
               <p className="font-black">{c.name}</p>
@@ -416,7 +416,7 @@ function MenteeRows() {
   return (
     <div className="space-y-3">
       {mentees.map((m) => (
-        <div key={m.name} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+        <div key={m.name} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
           <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="font-black">{m.name} · {m.market}</p>
@@ -457,7 +457,7 @@ function QuickActions({ openModal }: { openModal: (modal: ModalState) => void })
               body: `Start the ${label.toLowerCase()} workflow. This will later connect to the correct Supabase form/table.`,
             })
           }
-          className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-[#2a151a]"
+          className="rounded-2xl border border-[#ff8fab33] bg-[#171112] p-4 text-left transition hover:bg-[#2a151a]"
         >
           <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
           <p className="text-xs font-black">{label}</p>
@@ -482,7 +482,7 @@ function ClientJourneyAndPlan({ openModal }: { openModal: (modal: ModalState) =>
       >
         <div className="space-y-3">
           {clientTimeline.map((t) => (
-            <div key={t.title} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+            <div key={t.title} className="flex gap-4 rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
               <div className="mt-1 h-3 w-3 rounded-full bg-[#e66f8e] shadow-[0_0_20px_rgba(230,111,142,.8)]" />
               <div className="flex-1">
                 <p className="text-xs font-bold text-[#f1889e]">{t.date}</p>
@@ -507,7 +507,7 @@ function ClientJourneyAndPlan({ openModal }: { openModal: (modal: ModalState) =>
       >
         <div className="space-y-3">
           {carePlan.map(([title, sub]) => (
-            <div key={title} className="flex items-center gap-3 rounded-2xl bg-white/[0.035] p-4">
+            <div key={title} className="flex items-center gap-3 rounded-2xl bg-[#151011] p-4">
               <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#2a151a] text-[#f1889e]">
                 <Droplets className="h-5 w-5" />
               </div>
@@ -569,7 +569,7 @@ function MentorMenteeProgressView({ openModal }: { openModal: (modal: ModalState
           }
         >
           {mentorTasks.map((task, i) => (
-            <div key={task} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
+            <div key={task} className="mb-3 flex items-center justify-between rounded-2xl bg-[#151011] p-4">
               <span className="text-sm font-bold">{task}</span>
               <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 1}</span>
             </div>
@@ -588,7 +588,7 @@ function MentorMenteeProgressView({ openModal }: { openModal: (modal: ModalState
         >
           <div className="grid gap-4 md:grid-cols-3">
             {["Raise starter loc pricing by $15", "Post 2 transformation reels", "Launch client journey check-ins"].map((item) => (
-              <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div key={item} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
                 <Sparkles className="mb-3 h-5 w-5 text-[#f1889e]" />
                 <p className="font-bold">{item}</p>
               </div>
@@ -602,7 +602,7 @@ function MentorMenteeProgressView({ openModal }: { openModal: (modal: ModalState
 
 function Snapshot({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <div className="rounded-2xl bg-white/[0.035] p-4">
+    <div className="rounded-2xl bg-[#151011] p-4">
       <p className="text-xs text-[#b8a8a4]">{label}</p>
       <p className="text-2xl font-black">{value}</p>
       <p className="text-xs text-[#b8a8a4]">{sub}</p>
@@ -633,7 +633,7 @@ function MentorClientManagementView({ openModal }: { openModal: (modal: ModalSta
         >
           <div className="space-y-3">
             {appointments.map((a) => (
-              <div key={a.time} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div key={a.time} className="flex items-center justify-between rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
                 <div>
                   <p className="text-sm font-black">{a.time} · {a.name}</p>
                   <p className="text-xs text-[#b8a8a4]">{a.type}</p>
@@ -692,7 +692,7 @@ function MentorView({ openModal }: { openModal: (modal: ModalState) => void }) {
         <button
           onClick={() => setTab("mentees")}
           className={`rounded-2xl px-5 py-3 text-sm font-black ${
-            tab === "mentees" ? "bg-[#e66f8e] text-white" : "border border-white/10 bg-white/[0.04] text-[#b8a8a4]"
+            tab === "mentees" ? "bg-[#f1889e] text-[#17090d]" : "border border-white/10 bg-[#171112] text-[#f3b4c1]"
           }`}
         >
           Mentee Business Progress
@@ -700,7 +700,7 @@ function MentorView({ openModal }: { openModal: (modal: ModalState) => void }) {
         <button
           onClick={() => setTab("mentorClients")}
           className={`rounded-2xl px-5 py-3 text-sm font-black ${
-            tab === "mentorClients" ? "bg-[#e66f8e] text-white" : "border border-white/10 bg-white/[0.04] text-[#b8a8a4]"
+            tab === "mentorClients" ? "bg-[#f1889e] text-[#17090d]" : "border border-white/10 bg-[#171112] text-[#f3b4c1]"
           }`}
         >
           Mentor’s Client Management
@@ -747,7 +747,7 @@ function MenteeView({ openModal }: { openModal: (modal: ModalState) => void }) {
           }
         >
           {["Review photo updates", "Follow up with clients", "Update care plans", "Check-in reminders"].map((t, i) => (
-            <div key={t} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
+            <div key={t} className="mb-3 flex items-center justify-between rounded-2xl bg-[#151011] p-4">
               <span className="text-sm font-bold">{t}</span>
               <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 2}</span>
             </div>
@@ -807,7 +807,7 @@ function ClientView({ openModal }: { openModal: (modal: ModalState) => void }) {
                   body: "Appointment detail view with service type, preparation notes, intake questions, payment status, and reschedule options.",
                 })
               }
-              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] py-3 font-black"
+              className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#f1889e] to-[#dca669] py-3 font-black text-[#17090d]"
             >
               View Details
             </button>
@@ -829,7 +829,7 @@ function ClientView({ openModal }: { openModal: (modal: ModalState) => void }) {
       >
         <div className="grid gap-4 sm:grid-cols-3">
           {["Starter locs", "Budding phase", "Current progress"].map((label) => (
-            <div key={label} className="grid aspect-[4/3] place-items-center rounded-3xl border border-dashed border-[#ffb7c42e] bg-white/[0.04]">
+            <div key={label} className="grid aspect-[4/3] place-items-center rounded-3xl border border-dashed border-[#ffb7c42e] bg-[#171112]">
               <div className="text-center text-[#b8a8a4]">
                 <Camera className="mx-auto mb-3 h-8 w-8 text-[#f1889e]" />
                 <p className="text-sm font-bold">{label}</p>
@@ -864,7 +864,7 @@ function AdminView({ openModal }: { openModal: (modal: ModalState) => void }) {
             })
           }
         >
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+          <div className="rounded-3xl border border-[#ff8fab33] bg-[#151011] p-6">
             <p className="text-5xl font-black text-[#f1889e]">{overallProgress}%</p>
             <p className="mt-2 text-[#b8a8a4]">Average client journey progress</p>
             <div className="mt-5"><ProgressBar value={overallProgress} /></div>
@@ -881,7 +881,7 @@ function AdminView({ openModal }: { openModal: (modal: ModalState) => void }) {
           }
         >
           {["New client signed up", "Payment received", "Appointment booked", "New mentor added"].map((x, i) => (
-            <div key={x} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
+            <div key={x} className="mb-3 flex items-center justify-between rounded-2xl bg-[#151011] p-4">
               <span className="text-sm font-bold">{x}</span>
               <span className="text-xs text-[#b8a8a4]">{i + 1}h ago</span>
             </div>
