@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useState } from "react";
@@ -8,10 +9,13 @@ import {
   CheckCircle2,
   Crown,
   Droplets,
+  ExternalLink,
   FileText,
   Home,
   ImagePlus,
+  Instagram,
   LineChart,
+  Link as LinkIcon,
   MessageCircle,
   PackageCheck,
   Plus,
@@ -26,15 +30,20 @@ import {
   UserRound,
   X,
   ClipboardList,
+  Facebook,
+  Share2,
+  Eye,
+  CalendarRange,
+  Megaphone,
 } from "lucide-react";
 
 type View = "mentor" | "mentee" | "client" | "admin";
-type MentorTab = "mentees" | "mentorClients";
+type WorkTab = "business" | "mentorship";
 type ModalState =
   | null
   | {
       title: string;
-      type: "add" | "view";
+      type: "add" | "view" | "calendar";
       body: string;
     };
 
@@ -97,9 +106,11 @@ const clientTimeline = [
 ];
 
 const appointments = [
-  { time: "10:00 AM", name: "Layla M.", type: "Check-in & Photo Update" },
-  { time: "1:30 PM", name: "Jasmine R.", type: "Consult" },
-  { time: "4:00 PM", name: "Brianna T.", type: "Follow-up" },
+  { day: "3", time: "10:00 AM", name: "Layla M.", type: "Check-in & Photo Update" },
+  { day: "7", time: "1:30 PM", name: "Jasmine R.", type: "Consult" },
+  { day: "12", time: "4:00 PM", name: "Brianna T.", type: "Follow-up" },
+  { day: "19", time: "9:30 AM", name: "Maya L.", type: "Maintenance" },
+  { day: "24", time: "11:00 AM", name: "Kia", type: "Mentorship Session" },
 ];
 
 const carePlan = [
@@ -109,9 +120,15 @@ const carePlan = [
   ["Protect", "Heat protectant daily"],
 ];
 
-const mentorTasks = [
-  "Review Kia’s pricing calculator",
-  "Give feedback on content plan",
+const socials = [
+  { platform: "Instagram", handle: "@locsbystephb", url: "instagram.com/locsbystephb", icon: Instagram, posts: 18, views: "12.4K" },
+  { platform: "Facebook", handle: "Locs by Steph B", url: "facebook.com/locsbystephb", icon: Facebook, posts: 9, views: "4.8K" },
+  { platform: "Booking", handle: "Book Appointment", url: "glossgenius.com/locsbystephb", icon: CalendarDays, posts: 0, views: "1.7K" },
+];
+
+const mentorshipTasks = [
+  "Review pricing strategy",
+  "Audit social content consistency",
   "Confirm client retention workflow",
   "Update next-session action plan",
 ];
@@ -140,7 +157,7 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
               className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
                 view === id
                   ? "bg-gradient-to-r from-[#f1889e] to-[#dca669] text-[#17090d] shadow-[0_0_30px_rgba(230,111,142,.24)]"
-                  : "text-[#b8a8a4] hover:bg-[#251319] hover:text-[#ffd6de]"
+                  : "text-[#f3b4c1] hover:bg-[#251319] hover:text-[#ffd6de]"
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -149,14 +166,14 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
           ))}
         </nav>
 
-        <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-[#ff8fab33] bg-[#171112] p-4">
+        <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-white/10 bg-[#151011] p-4">
           <div className="flex items-center gap-3">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-[#2a151a] text-[#f7a0af]">
               <Crown className="h-5 w-5" />
             </div>
             <div>
               <p className="font-bold">Mentor Account</p>
-              <p className="text-xs text-[#b8a8a4]">Coaching + client care</p>
+              <p className="text-xs text-[#b8a8a4]">Business + mentorship + client care</p>
             </div>
           </div>
         </div>
@@ -182,8 +199,8 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
             <div className="relative hidden w-full max-w-md md:block">
               <Search className="absolute left-4 top-3.5 h-4 w-4 text-[#b8a8a4]" />
               <input
-                className="w-full rounded-2xl border border-[#ff8fab33] bg-[#171112] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-[#76676a]"
-                placeholder="Search mentees, clients, appointments, notes..."
+                className="w-full rounded-2xl border border-white/10 bg-[#171112] py-3 pl-11 pr-4 text-sm text-[#fff7f4] outline-none placeholder:text-[#76676a]"
+                placeholder="Search mentees, clients, appointments, socials..."
               />
             </div>
 
@@ -193,7 +210,7 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
                   openModal({
                     title: "Add Record",
                     type: "add",
-                    body: "Choose what you want to add: mentee, client, appointment, wash-day log, progress photo, care note, product entry, coaching session, or business goal.",
+                    body: "Choose what you want to add: mentee, client, appointment, wash-day log, progress photo, care note, product entry, coaching session, business goal, or social profile.",
                   })
                 }
                 className="rounded-2xl bg-gradient-to-r from-[#f1889e] to-[#dca669] px-4 py-2 text-sm font-black text-[#17090d] shadow-[0_0_30px_rgba(230,111,142,.3)]"
@@ -202,8 +219,8 @@ function Shell({ view, setView, children, openModal }: { view: View; setView: (v
                 Add Record
               </button>
               <button className="relative rounded-full border border-[#ff8fab33] bg-[#171112] p-3">
-                <Bell className="h-4 w-4" />
-                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#e66f8e] text-xs font-bold">3</span>
+                <Bell className="h-4 w-4 text-[#f3b4c1]" />
+                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#f1889e] text-xs font-bold text-[#17090d]">3</span>
               </button>
             </div>
           </div>
@@ -220,11 +237,11 @@ function AppModal({ modal, close }: { modal: ModalState; close: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-2xl rounded-[2rem] border border-[#ffb7c42e] bg-[#111010] p-6 shadow-[0_30px_100px_rgba(0,0,0,.75)]">
+      <div className="max-h-[90vh] w-full max-w-4xl overflow-auto rounded-[2rem] border border-[#ffb7c42e] bg-[#111010] p-6 shadow-[0_30px_100px_rgba(0,0,0,.75)]">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="mb-2 inline-flex rounded-full bg-[#2a151a] px-3 py-1 text-xs font-black uppercase tracking-[.2em] text-[#f1889e]">
-              {modal.type === "add" ? "Action" : "Details"}
+              {modal.type === "calendar" ? "Calendar" : modal.type === "add" ? "Action" : "Details"}
             </p>
             <h2 className="text-3xl font-black">{modal.title}</h2>
             <p className="mt-2 text-sm leading-6 text-[#b8a8a4]">{modal.body}</p>
@@ -234,7 +251,9 @@ function AppModal({ modal, close }: { modal: ModalState; close: () => void }) {
           </button>
         </div>
 
-        {modal.type === "add" ? <AddRecordOptions /> : <ViewDetailsContent title={modal.title} />}
+        {modal.type === "add" && <AddRecordOptions />}
+        {modal.type === "calendar" && <MonthlyCalendar />}
+        {modal.type === "view" && <ViewDetailsContent title={modal.title} />}
 
         <button onClick={close} className="mt-6 w-full rounded-2xl bg-gradient-to-r from-[#f1889e] to-[#dca669] py-3 font-black text-[#17090d]">
           Close
@@ -253,15 +272,16 @@ function AddRecordOptions() {
     ["Progress Photo", Camera],
     ["Care Note", FileText],
     ["Product Entry", PackageCheck],
+    ["Social Profile", Share2],
     ["Coaching Session", ClipboardList],
   ] as const;
 
   return (
-    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+    <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
       {options.map(([label, Icon]) => (
         <button key={label} className="rounded-2xl border border-[#ff8fab33] bg-[#171112] p-4 text-left transition hover:bg-[#2a151a]">
           <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
-          <p className="text-sm font-black">{label}</p>
+          <p className="text-sm font-black text-[#f3b4c1]">{label}</p>
         </button>
       ))}
     </div>
@@ -269,15 +289,51 @@ function AddRecordOptions() {
 }
 
 function ViewDetailsContent({ title }: { title: string }) {
-  if (title.toLowerCase().includes("progress")) {
-    return <ProgressBreakdown />;
-  }
+  if (title.toLowerCase().includes("progress")) return <ProgressBreakdown />;
+  if (title.toLowerCase().includes("social")) return <SocialConnections showClientLinks />;
 
   return (
     <div className="rounded-3xl border border-[#ff8fab33] bg-[#151011] p-5">
       <p className="text-sm leading-6 text-[#b8a8a4]">
-        This is where the full list/detail view will go once connected to Supabase. For now, the button confirms the navigation behavior and gives you a clear place to wire real records.
+        This is the full detail area for <span className="font-bold text-[#f3b4c1]">{title}</span>. Once Supabase is connected, this panel should render the full table, record list, form, or analytics view for this section.
       </p>
+    </div>
+  );
+}
+
+function MonthlyCalendar() {
+  const days = Array.from({ length: 30 }, (_, i) => String(i + 1));
+  const appointmentMap = new Map(appointments.map((a) => [a.day, a]));
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between rounded-3xl border border-[#ff8fab33] bg-[#151011] p-4">
+        <div>
+          <p className="text-sm text-[#b8a8a4]">Monthly Schedule</p>
+          <p className="text-2xl font-black">June 2026</p>
+        </div>
+        <CalendarRange className="h-8 w-8 text-[#f1889e]" />
+      </div>
+
+      <div className="grid grid-cols-7 gap-2">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+          <div key={d} className="rounded-xl bg-[#2a151a] p-2 text-center text-xs font-black text-[#f1889e]">{d}</div>
+        ))}
+        {days.map((day) => {
+          const appt = appointmentMap.get(day);
+          return (
+            <div key={day} className="min-h-24 rounded-2xl border border-[#ff8fab33] bg-[#151011] p-3">
+              <p className="mb-2 text-sm font-black text-[#f3b4c1]">{day}</p>
+              {appt && (
+                <div className="rounded-xl bg-[#2a151a] p-2">
+                  <p className="text-xs font-black text-[#f1889e]">{appt.time}</p>
+                  <p className="text-xs text-[#b8a8a4]">{appt.name}</p>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -355,7 +411,7 @@ function Panel({
 
 function ProgressBar({ value }: { value: number }) {
   return (
-    <div className="h-2 overflow-hidden rounded-full bg-white/10">
+    <div className="h-2 overflow-hidden rounded-full bg-[#2a151a]">
       <div className="h-full rounded-full bg-gradient-to-r from-[#e66f8e] to-[#f4a27c]" style={{ width: `${value}%` }} />
     </div>
   );
@@ -371,6 +427,29 @@ function Hero({ title, subtitle }: { title: string; subtitle: string }) {
         <p className="mt-3 max-w-2xl text-[#b8a8a4]">{subtitle}</p>
       </div>
     </section>
+  );
+}
+
+function WorkTabs({ tab, setTab }: { tab: WorkTab; setTab: (tab: WorkTab) => void }) {
+  return (
+    <div className="flex flex-wrap gap-3">
+      <button
+        onClick={() => setTab("business")}
+        className={`rounded-2xl px-5 py-3 text-sm font-black ${
+          tab === "business" ? "bg-[#f1889e] text-[#17090d]" : "border border-[#ff8fab33] bg-[#171112] text-[#f3b4c1]"
+        }`}
+      >
+        Client + Business Management
+      </button>
+      <button
+        onClick={() => setTab("mentorship")}
+        className={`rounded-2xl px-5 py-3 text-sm font-black ${
+          tab === "mentorship" ? "bg-[#f1889e] text-[#17090d]" : "border border-[#ff8fab33] bg-[#171112] text-[#f3b4c1]"
+        }`}
+      >
+        Mentorship + Growth
+      </button>
+    </div>
   );
 }
 
@@ -394,25 +473,6 @@ function ClientRows() {
 }
 
 function MenteeRows() {
-  const mentees = [
-    {
-      name: "Kia",
-      market: "Atlanta",
-      niche: "Locs + protective styles",
-      progress: 74,
-      status: "On track",
-      nextSession: "Jun 24",
-    },
-    {
-      name: "Maya",
-      market: "Charlotte",
-      niche: "Color + loc repair",
-      progress: 58,
-      status: "Needs focus",
-      nextSession: "Jun 28",
-    },
-  ];
-
   return (
     <div className="space-y-3">
       {mentees.map((m) => (
@@ -432,6 +492,78 @@ function MenteeRows() {
         </div>
       ))}
     </div>
+  );
+}
+
+function SocialConnections({ showClientLinks = false }: { showClientLinks?: boolean }) {
+  return (
+    <div className="space-y-4">
+      <div className="grid gap-3 md:grid-cols-3">
+        {socials.map((s) => {
+          const Icon = s.icon;
+          return (
+            <div key={s.platform} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#2a151a] text-[#f1889e]">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <ExternalLink className="h-4 w-4 text-[#dca669]" />
+              </div>
+              <p className="font-black">{s.platform}</p>
+              <p className="text-sm text-[#f3b4c1]">{s.handle}</p>
+              <p className="mt-1 text-xs text-[#b8a8a4]">{s.url}</p>
+              {showClientLinks && <p className="mt-3 text-xs font-bold text-[#dca669]">Visible to clients</p>}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SocialTracking({ openModal }: { openModal: (modal: ModalState) => void }) {
+  return (
+    <Panel
+      title="Connected Socials + Performance"
+      onViewAll={() =>
+        openModal({
+          title: "Social Network Pages",
+          type: "view",
+          body: "Connected social pages, post counts, page views, engagement, and public links clients can access.",
+        })
+      }
+    >
+      <div className="grid gap-4 lg:grid-cols-[1fr_.8fr]">
+        <SocialConnections showClientLinks />
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
+            <Megaphone className="mb-3 h-5 w-5 text-[#f1889e]" />
+            <p className="text-3xl font-black">27</p>
+            <p className="text-sm text-[#b8a8a4]">Posts this month</p>
+          </div>
+          <div className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
+            <Eye className="mb-3 h-5 w-5 text-[#f1889e]" />
+            <p className="text-3xl font-black">18.9K</p>
+            <p className="text-sm text-[#b8a8a4]">Page/profile views</p>
+          </div>
+          <button
+            onClick={() =>
+              openModal({
+                title: "Connect Social Account",
+                type: "add",
+                body: "Connect Instagram, Facebook, TikTok, booking pages, or Google Business Profile to track posts, views, engagement, and client-facing links.",
+              })
+            }
+            className="rounded-2xl border border-[#ff8fab33] bg-[#171112] p-4 text-left transition hover:bg-[#2a151a] sm:col-span-2"
+          >
+            <LinkIcon className="mb-3 h-5 w-5 text-[#f1889e]" />
+            <p className="font-black text-[#f3b4c1]">Connect or update social accounts</p>
+            <p className="mt-1 text-xs text-[#b8a8a4]">Use API integrations later for automated post and view counts.</p>
+          </button>
+        </div>
+      </div>
+    </Panel>
   );
 }
 
@@ -460,9 +592,162 @@ function QuickActions({ openModal }: { openModal: (modal: ModalState) => void })
           className="rounded-2xl border border-[#ff8fab33] bg-[#171112] p-4 text-left transition hover:bg-[#2a151a]"
         >
           <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
-          <p className="text-xs font-black">{label}</p>
+          <p className="text-xs font-black text-[#f3b4c1]">{label}</p>
         </button>
       ))}
+    </div>
+  );
+}
+
+function SchedulePanel({ openModal, title = "Schedule" }: { openModal: (modal: ModalState) => void; title?: string }) {
+  return (
+    <Panel
+      title={title}
+      action={false}
+    >
+      <div className="mb-4 flex justify-end">
+        <button
+          onClick={() =>
+            openModal({
+              title: "Full Monthly Schedule",
+              type: "calendar",
+              body: "A full calendar view for appointments, client check-ins, wash-day reminders, and mentorship sessions.",
+            })
+          }
+          className="rounded-2xl bg-gradient-to-r from-[#f1889e] to-[#dca669] px-4 py-2 text-sm font-black text-[#17090d]"
+        >
+          <CalendarRange className="mr-2 inline h-4 w-4" />
+          Calendar
+        </button>
+      </div>
+
+      <div className="space-y-3">
+        {appointments.slice(0, 3).map((a) => (
+          <div key={`${a.time}-${a.name}`} className="flex items-center justify-between rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
+            <div>
+              <p className="text-sm font-black">{a.time} · {a.name}</p>
+              <p className="text-xs text-[#b8a8a4]">{a.type}</p>
+            </div>
+            <button
+              onClick={() =>
+                openModal({
+                  title: `${a.name} Appointment`,
+                  type: "view",
+                  body: "Appointment detail view with service type, preparation notes, intake questions, payment status, and reschedule options.",
+                })
+              }
+              className="rounded-full border border-[#e66f8e]/40 bg-[#171112] px-3 py-1 text-xs font-bold text-[#f1889e]"
+            >
+              Details
+            </button>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
+function BusinessManagement({ owner, openModal }: { owner: "mentor" | "mentee"; openModal: (modal: ModalState) => void }) {
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={Users} label={owner === "mentor" ? "Mentor's Active Clients" : "Active Clients"} value={owner === "mentor" ? "24" : "47"} />
+        <Metric icon={CalendarDays} label="Appointments Today" value={owner === "mentor" ? "6" : "8"} />
+        <Metric icon={WalletCards} label="Monthly Revenue" value={owner === "mentor" ? "$6.8K" : "$4.1K"} />
+        <Metric icon={Eye} label="Social Page Views" value={owner === "mentor" ? "18.9K" : "9.4K"} />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
+        <Panel
+          title={owner === "mentor" ? "Mentor's Client Management" : "Mentee's Client Management"}
+          onViewAll={() =>
+            openModal({
+              title: "Client Management",
+              type: "view",
+              body: "Full client management view: client list, appointments, care plans, product notes, photos, journey timeline, and reminders.",
+            })
+          }
+        >
+          <ClientRows />
+        </Panel>
+
+        <SchedulePanel openModal={openModal} title="Client + Business Schedule" />
+      </div>
+
+      <SocialTracking openModal={openModal} />
+
+      <Panel title="Quick Business Actions" action={false}>
+        <QuickActions openModal={openModal} />
+      </Panel>
+    </div>
+  );
+}
+
+function MentorshipGrowth({ role, openModal }: { role: "mentor" | "mentee"; openModal: (modal: ModalState) => void }) {
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={Target} label="Goal Progress" value="74%" />
+        <Metric icon={TrendingUp} label="Revenue Growth" value="18%" />
+        <Metric icon={BriefcaseBusiness} label="Business Health" value="82" />
+        <Metric icon={CalendarDays} label="Next Session" value="Jun 24" />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
+        <Panel
+          title={role === "mentor" ? "Mentee Business Progress" : "My Business Growth Plan"}
+          onViewAll={() =>
+            openModal({
+              title: role === "mentor" ? "Mentee Business Progress" : "Business Growth Plan",
+              type: "view",
+              body: "Mentorship should focus on business growth: goals, pricing, content consistency, client retention, booking strategy, and session notes.",
+            })
+          }
+        >
+          {role === "mentor" ? <MenteeRows /> : <GrowthPlanCards />}
+        </Panel>
+
+        <Panel title={role === "mentor" ? "Coaching Tasks" : "Mentorship Action Items"}>
+          {mentorshipTasks.map((task, i) => (
+            <div key={task} className="mb-3 flex items-center justify-between rounded-2xl bg-[#151011] p-4">
+              <span className="text-sm font-bold">{task}</span>
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 1}</span>
+            </div>
+          ))}
+        </Panel>
+      </div>
+
+      <Panel title="Business Growth Opportunities">
+        <div className="grid gap-4 md:grid-cols-3">
+          {["Raise starter loc pricing by $15", "Post 2 transformation reels", "Launch client journey check-ins"].map((item) => (
+            <div key={item} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
+              <Sparkles className="mb-3 h-5 w-5 text-[#f1889e]" />
+              <p className="font-bold">{item}</p>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function GrowthPlanCards() {
+  return (
+    <div className="grid gap-3 md:grid-cols-2">
+      <Snapshot label="Pricing Goal" value="+$15" sub="Starter loc package increase" />
+      <Snapshot label="Content Goal" value="3x/week" sub="Reels + transformation posts" />
+      <Snapshot label="Retention Goal" value="85%" sub="Client check-ins + reminders" />
+      <Snapshot label="Next Session" value="Jun 24" sub="Review pricing + social metrics" />
+    </div>
+  );
+}
+
+function Snapshot({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div className="rounded-2xl bg-[#151011] p-4">
+      <p className="text-xs text-[#b8a8a4]">{label}</p>
+      <p className="text-2xl font-black">{value}</p>
+      <p className="text-xs text-[#b8a8a4]">{sub}</p>
     </div>
   );
 }
@@ -523,237 +808,32 @@ function ClientJourneyAndPlan({ openModal }: { openModal: (modal: ModalState) =>
   );
 }
 
-function MentorMenteeProgressView({ openModal }: { openModal: (modal: ModalState) => void }) {
-  return (
-    <div className="space-y-5">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={Users} label="Active Mentees" value="12" />
-        <Metric icon={Target} label="Avg Goal Progress" value="74%" />
-        <Metric icon={BriefcaseBusiness} label="Mentee Clients" value="139" />
-        <Metric icon={TrendingUp} label="Avg Revenue Growth" value="18%" />
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
-        <Panel
-          title="Mentee Business Progress"
-          onViewAll={() =>
-            openModal({
-              title: "Mentee Business Progress",
-              type: "view",
-              body: "Full mentee list with business stage, goals, revenue, bookings, clients, content score, next session, and coaching priorities.",
-            })
-          }
-        >
-          <MenteeRows />
-        </Panel>
-
-        <Panel title="Kia's Business Snapshot" action={false}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Snapshot label="Revenue" value="$4.1K" sub="Goal: $5K" />
-            <Snapshot label="Bookings" value="32" sub="Active clients: 47" />
-            <Snapshot label="Content Score" value="68%" sub="Needs consistency" />
-            <Snapshot label="Next Session" value="Jun 24" sub="Pricing + retention" />
-          </div>
-        </Panel>
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
-        <Panel
-          title="Mentor Coaching Tasks"
-          onViewAll={() =>
-            openModal({
-              title: "Mentor Coaching Tasks",
-              type: "view",
-              body: "Full task board for mentor follow-ups, assignments, due dates, session prep, and mentee accountability.",
-            })
-          }
-        >
-          {mentorTasks.map((task, i) => (
-            <div key={task} className="mb-3 flex items-center justify-between rounded-2xl bg-[#151011] p-4">
-              <span className="text-sm font-bold">{task}</span>
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 1}</span>
-            </div>
-          ))}
-        </Panel>
-
-        <Panel
-          title="Business Growth Opportunities"
-          onViewAll={() =>
-            openModal({
-              title: "Business Growth Opportunities",
-              type: "view",
-              body: "Full opportunity feed based on pricing, competitor trends, booking patterns, content performance, and retention signals.",
-            })
-          }
-        >
-          <div className="grid gap-4 md:grid-cols-3">
-            {["Raise starter loc pricing by $15", "Post 2 transformation reels", "Launch client journey check-ins"].map((item) => (
-              <div key={item} className="rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
-                <Sparkles className="mb-3 h-5 w-5 text-[#f1889e]" />
-                <p className="font-bold">{item}</p>
-              </div>
-            ))}
-          </div>
-        </Panel>
-      </div>
-    </div>
-  );
-}
-
-function Snapshot({ label, value, sub }: { label: string; value: string; sub: string }) {
-  return (
-    <div className="rounded-2xl bg-[#151011] p-4">
-      <p className="text-xs text-[#b8a8a4]">{label}</p>
-      <p className="text-2xl font-black">{value}</p>
-      <p className="text-xs text-[#b8a8a4]">{sub}</p>
-    </div>
-  );
-}
-
-function MentorClientManagementView({ openModal }: { openModal: (modal: ModalState) => void }) {
-  return (
-    <div className="space-y-5">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={Users} label="Mentor's Active Clients" value="24" />
-        <Metric icon={CalendarDays} label="Appointments Today" value="6" />
-        <Metric icon={CheckCircle2} label="Client Tasks Due" value="14" />
-        <Metric icon={LineChart} label="Avg Client Progress" value={`${overallProgress}%`} />
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr_.9fr]">
-        <Panel
-          title="Mentor's Client Schedule"
-          onViewAll={() =>
-            openModal({
-              title: "Mentor's Client Schedule",
-              type: "view",
-              body: "Full calendar view for the mentor’s own direct clients.",
-            })
-          }
-        >
-          <div className="space-y-3">
-            {appointments.map((a) => (
-              <div key={a.time} className="flex items-center justify-between rounded-2xl border border-[#ff8fab33] bg-[#151011] p-4">
-                <div>
-                  <p className="text-sm font-black">{a.time} · {a.name}</p>
-                  <p className="text-xs text-[#b8a8a4]">{a.type}</p>
-                </div>
-                <button
-                  onClick={() =>
-                    openModal({
-                      title: `${a.name} Check-in`,
-                      type: "add",
-                      body: "Open the client check-in workflow: add notes, upload photos, update care plan, and schedule the next appointment.",
-                    })
-                  }
-                  className="rounded-full border border-[#e66f8e]/40 px-3 py-1 text-xs font-bold text-[#f1889e]"
-                >
-                  Check-in
-                </button>
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel
-          title="Recent Client Activity"
-          onViewAll={() =>
-            openModal({
-              title: "Recent Client Activity",
-              type: "view",
-              body: "Full recent client activity feed for direct clients.",
-            })
-          }
-        >
-          <ClientRows />
-        </Panel>
-
-        <Panel title="Quick Client Actions" action={false}>
-          <QuickActions openModal={openModal} />
-        </Panel>
-      </div>
-
-      <ClientJourneyAndPlan openModal={openModal} />
-    </div>
-  );
-}
-
 function MentorView({ openModal }: { openModal: (modal: ModalState) => void }) {
-  const [tab, setTab] = useState<"mentees" | "mentorClients">("mentees");
+  const [tab, setTab] = useState<WorkTab>("business");
 
   return (
     <div className="space-y-7">
       <Hero
         title="Mentor HQ"
-        subtitle="Coach mentees on business growth, while also managing the mentor’s own direct clients when needed."
+        subtitle="Manage your own clients and business operations, while keeping mentorship as a separate growth system for mentees."
       />
-
-      <div className="flex flex-wrap gap-3">
-        <button
-          onClick={() => setTab("mentees")}
-          className={`rounded-2xl px-5 py-3 text-sm font-black ${
-            tab === "mentees" ? "bg-[#f1889e] text-[#17090d]" : "border border-white/10 bg-[#171112] text-[#f3b4c1]"
-          }`}
-        >
-          Mentee Business Progress
-        </button>
-        <button
-          onClick={() => setTab("mentorClients")}
-          className={`rounded-2xl px-5 py-3 text-sm font-black ${
-            tab === "mentorClients" ? "bg-[#f1889e] text-[#17090d]" : "border border-white/10 bg-[#171112] text-[#f3b4c1]"
-          }`}
-        >
-          Mentor’s Client Management
-        </button>
-      </div>
-
-      {tab === "mentees" ? <MentorMenteeProgressView openModal={openModal} /> : <MentorClientManagementView openModal={openModal} />}
+      <WorkTabs tab={tab} setTab={setTab} />
+      {tab === "business" ? <BusinessManagement owner="mentor" openModal={openModal} /> : <MentorshipGrowth role="mentor" openModal={openModal} />}
     </div>
   );
 }
 
 function MenteeView({ openModal }: { openModal: (modal: ModalState) => void }) {
+  const [tab, setTab] = useState<WorkTab>("business");
+
   return (
     <div className="space-y-7">
-      <Hero title="Mentee Business Dashboard" subtitle="A clean operating view for bookings, clients, content, products, and follow-ups." />
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Metric icon={WalletCards} label="Monthly Revenue" value="$4.1K" />
-        <Metric icon={CalendarDays} label="Booked Appts" value="56" />
-        <Metric icon={MessageCircle} label="Messages" value="132" />
-        <Metric icon={ShieldCheck} label="Retention Rate" value="86%" />
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
-        <Panel
-          title="Mentee's Clients"
-          onViewAll={() =>
-            openModal({
-              title: "Mentee's Clients",
-              type: "view",
-              body: "Full client list owned by the mentee.",
-            })
-          }
-        >
-          <ClientRows />
-        </Panel>
-        <Panel
-          title="Business Tasks Due"
-          onViewAll={() =>
-            openModal({
-              title: "Business Tasks Due",
-              type: "view",
-              body: "Full task list for the mentee dashboard.",
-            })
-          }
-        >
-          {["Review photo updates", "Follow up with clients", "Update care plans", "Check-in reminders"].map((t, i) => (
-            <div key={t} className="mb-3 flex items-center justify-between rounded-2xl bg-[#151011] p-4">
-              <span className="text-sm font-bold">{t}</span>
-              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 2}</span>
-            </div>
-          ))}
-        </Panel>
-      </div>
+      <Hero
+        title="Mentee Dashboard"
+        subtitle="Run the business day-to-day, track clients and socials, and use mentorship as the growth layer."
+      />
+      <WorkTabs tab={tab} setTab={setTab} />
+      {tab === "business" ? <BusinessManagement owner="mentee" openModal={openModal} /> : <MentorshipGrowth role="mentee" openModal={openModal} />}
     </div>
   );
 }
@@ -761,7 +841,21 @@ function MenteeView({ openModal }: { openModal: (modal: ModalState) => void }) {
 function ClientView({ openModal }: { openModal: (modal: ModalState) => void }) {
   return (
     <div className="space-y-7">
-      <Hero title="Hey, Layla! 👋" subtitle="Your individual hair journey, appointment plan, care routine, and progress history." />
+      <Hero title="Hey, Layla! 👋" subtitle="Your individual hair journey, appointment plan, care routine, business links, and progress history." />
+
+      <Panel
+        title="Connect With Your Stylist"
+        onViewAll={() =>
+          openModal({
+            title: "Social Network Pages",
+            type: "view",
+            body: "Clients can access the stylist's social pages, booking link, and business profile from here.",
+          })
+        }
+      >
+        <SocialConnections showClientLinks />
+      </Panel>
+
       <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
         <Panel
           title="Your Progress Overview"
@@ -786,7 +880,7 @@ function ClientView({ openModal }: { openModal: (modal: ModalState) => void }) {
                   body: "The progress score is calculated from appointment consistency, photo/check-in updates, care plan completion, wash-day tracking, and product/routine adherence.",
                 })
               }
-              className="rounded-full border border-[#e66f8e]/40 px-3 py-2 text-xs font-bold text-[#f1889e]"
+              className="rounded-full border border-[#e66f8e]/40 bg-[#171112] px-3 py-2 text-xs font-bold text-[#f1889e]"
             >
               What counts?
             </button>
@@ -864,7 +958,7 @@ function AdminView({ openModal }: { openModal: (modal: ModalState) => void }) {
             })
           }
         >
-          <div className="rounded-3xl border border-[#ff8fab33] bg-[#151011] p-6">
+          <div className="rounded-3xl border border-white/10 bg-[#151011] p-6">
             <p className="text-5xl font-black text-[#f1889e]">{overallProgress}%</p>
             <p className="mt-2 text-[#b8a8a4]">Average client journey progress</p>
             <div className="mt-5"><ProgressBar value={overallProgress} /></div>
