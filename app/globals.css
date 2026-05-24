@@ -2,6 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #070708;
+  --text: #fff7f4;
+  --muted: #b8a8a4;
+  --rose: #e66f8e;
+  --gold: #dca669;
+}
+
+html,
 body {
-  background: #f8fafc;
+  margin: 0;
+  background:
+    radial-gradient(circle at top right, rgba(230, 111, 142, 0.16), transparent 32rem),
+    radial-gradient(circle at bottom left, rgba(220, 166, 105, 0.10), transparent 34rem),
+    #070708;
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
 }

@@ -1,0 +1,437 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import {
+  Bell,
+  CalendarDays,
+  Camera,
+  CheckCircle2,
+  Crown,
+  Droplets,
+  FileText,
+  Home,
+  ImagePlus,
+  LineChart,
+  MessageCircle,
+  PackageCheck,
+  Plus,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  WalletCards,
+} from "lucide-react";
+
+type View = "mentor" | "mentee" | "client" | "admin";
+
+const clients = [
+  { name: "Layla M.", service: "Check-in & Photo Update", progress: 72, status: "Photo due", next: "May 28" },
+  { name: "Jasmine R.", service: "Color Correction Plan", progress: 58, status: "Needs review", next: "May 30" },
+  { name: "Brianna T.", service: "Maintenance Plan", progress: 81, status: "Plan completed", next: "May 27" },
+  { name: "Maya L.", service: "Growth Plan", progress: 90, status: "Updated today", next: "May 31" },
+];
+
+const timeline = [
+  { date: "Today", title: "Photo Update", body: "Front and back progress photos added." },
+  { date: "Apr 30", title: "Deep Conditioning Treatment", body: "Hydration boost and trim completed." },
+  { date: "Apr 16", title: "Color Refresh", body: "Gloss and root blend completed." },
+  { date: "Apr 2", title: "Consultation", body: "Goal setting and journey plan created." },
+];
+
+const appointments = [
+  { time: "10:00 AM", name: "Layla M.", type: "Check-in & Photo Update" },
+  { time: "1:30 PM", name: "Jasmine R.", type: "Consult" },
+  { time: "4:00 PM", name: "Brianna T.", type: "Follow-up" },
+];
+
+const plan = [
+  ["Hydration", "3x per week"],
+  ["Protein", "1x per week"],
+  ["Scalp Care", "Massage 2x per week"],
+  ["Protect", "Heat protectant daily"],
+];
+
+function Shell({ view, setView, children }: { view: View; setView: (view: View) => void; children: React.ReactNode }) {
+  const nav = [
+    ["mentor", "Mentor", Home],
+    ["mentee", "Mentee", Users],
+    ["client", "Client", Sparkles],
+    ["admin", "Admin", LineChart],
+  ] as const;
+
+  return (
+    <main className="min-h-screen bg-[#070708] text-[#fff7f4]">
+      <aside className="fixed inset-y-0 left-0 hidden w-[260px] border-r border-[#ffb7c42e] bg-black/50 p-5 backdrop-blur-xl lg:block">
+        <div className="mb-10">
+          <div className="font-serif text-3xl italic tracking-wide text-[#f7a0af]">Hair Journey</div>
+          <div className="mt-1 text-xs font-bold uppercase tracking-[0.35em] text-[#dca669]">Mentor HQ</div>
+        </div>
+
+        <nav className="space-y-2">
+          {nav.map(([id, label, Icon]) => (
+            <button
+              key={id}
+              onClick={() => setView(id)}
+              className={`flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold transition ${
+                view === id
+                  ? "bg-gradient-to-r from-[#8d4052] to-[#c65d76] text-white shadow-[0_0_30px_rgba(230,111,142,.24)]"
+                  : "text-[#b8a8a4] hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {label} View
+            </button>
+          ))}
+        </nav>
+
+        <div className="absolute bottom-5 left-5 right-5 rounded-3xl border border-white/10 bg-white/[0.04] p-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-[#2a151a] text-[#f7a0af]">
+              <Crown className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-bold">Steph B.</p>
+              <p className="text-xs text-[#b8a8a4]">Mentor / Loctitian</p>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section className="lg:pl-[260px]">
+        <header className="sticky top-0 z-20 border-b border-white/10 bg-[#070708]/80 px-4 py-4 backdrop-blur-xl md:px-8">
+          <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-4">
+            <div className="flex gap-2 lg:hidden">
+              {nav.map(([id, label]) => (
+                <button
+                  key={id}
+                  onClick={() => setView(id)}
+                  className={`rounded-full px-3 py-2 text-xs font-bold ${
+                    view === id ? "bg-[#e66f8e] text-white" : "bg-white/5 text-[#b8a8a4]"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative hidden w-full max-w-md md:block">
+              <Search className="absolute left-4 top-3.5 h-4 w-4 text-[#b8a8a4]" />
+              <input
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] py-3 pl-11 pr-4 text-sm text-white outline-none placeholder:text-[#76676a]"
+                placeholder="Search clients, appointments, notes..."
+              />
+            </div>
+
+            <div className="ml-auto flex items-center gap-3">
+              <button className="rounded-2xl border border-[#ffb7c42e] bg-white/[0.04] px-4 py-2 text-sm font-bold text-[#fff7f4]">
+                <Plus className="mr-2 inline h-4 w-4" />
+                Add Client
+              </button>
+              <button className="relative rounded-full border border-white/10 bg-white/[0.04] p-3">
+                <Bell className="h-4 w-4" />
+                <span className="absolute -right-1 -top-1 grid h-5 w-5 place-items-center rounded-full bg-[#e66f8e] text-xs font-bold">3</span>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <div className="mx-auto max-w-[1500px] p-4 md:p-8">{children}</div>
+      </section>
+    </main>
+  );
+}
+
+function Metric({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <div className="rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.025))] p-5 shadow-[0_20px_60px_rgba(0,0,0,.35)]">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-[#2b161c] text-[#f1889e]">
+          <Icon className="h-5 w-5" />
+        </div>
+        <span className="text-xs font-bold text-emerald-400">↗ 12%</span>
+      </div>
+      <p className="text-3xl font-black tracking-tight">{value}</p>
+      <p className="mt-1 text-sm text-[#b8a8a4]">{label}</p>
+    </div>
+  );
+}
+
+function Panel({ title, children, action = true }: { title: string; children: React.ReactNode; action?: boolean }) {
+  return (
+    <section className="rounded-3xl border border-white/10 bg-[#111010]/80 p-5 shadow-[0_25px_80px_rgba(0,0,0,.38)] backdrop-blur-xl">
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="text-lg font-black">{title}</h2>
+        {action && <button className="text-xs font-bold text-[#f1889e]">View all</button>}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function ProgressBar({ value }: { value: number }) {
+  return (
+    <div className="h-2 overflow-hidden rounded-full bg-white/10">
+      <div className="h-full rounded-full bg-gradient-to-r from-[#e66f8e] to-[#f4a27c]" style={{ width: `${value}%` }} />
+    </div>
+  );
+}
+
+function Hero({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,.075),rgba(255,255,255,.025))] p-6 shadow-[0_25px_90px_rgba(0,0,0,.45)] md:p-8">
+      <div className="absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(circle_at_center,rgba(230,111,142,.20),transparent_24rem)]" />
+      <div className="relative">
+        <p className="mb-3 inline-flex rounded-full border border-[#ffb7c42e] bg-[#2a151a] px-3 py-1 text-xs font-black uppercase tracking-[0.2em] text-[#f1889e]">Hair Journey</p>
+        <h1 className="text-4xl font-black tracking-tight md:text-6xl">{title}</h1>
+        <p className="mt-3 max-w-2xl text-[#b8a8a4]">{subtitle}</p>
+      </div>
+    </section>
+  );
+}
+
+function ClientRows() {
+  return (
+    <div className="space-y-3">
+      {clients.map((c) => (
+        <div key={c.name} className="rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <p className="font-black">{c.name}</p>
+              <p className="text-xs text-[#b8a8a4]">{c.status} · Next {c.next}</p>
+            </div>
+            <span className="text-sm font-black text-[#f1889e]">{c.progress}%</span>
+          </div>
+          <ProgressBar value={c.progress} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function QuickActions() {
+  const actions = [
+    ["Send Message", MessageCircle],
+    ["Upload Photo", ImagePlus],
+    ["Create Plan", FileText],
+    ["Add Note", FileText],
+    ["Schedule Appt.", CalendarDays],
+    ["Resources", PackageCheck],
+  ] as const;
+
+  return (
+    <div className="grid grid-cols-2 gap-3">
+      {actions.map(([label, Icon]) => (
+        <button key={label} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 text-left transition hover:bg-[#2a151a]">
+          <Icon className="mb-3 h-5 w-5 text-[#f1889e]" />
+          <p className="text-xs font-black">{label}</p>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function JourneyAndPlan() {
+  return (
+    <div className="grid gap-5 xl:grid-cols-[1.4fr_.7fr]">
+      <Panel title="Journey Timeline">
+        <div className="space-y-3">
+          {timeline.map((t) => (
+            <div key={t.title} className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <div className="mt-1 h-3 w-3 rounded-full bg-[#e66f8e] shadow-[0_0_20px_rgba(230,111,142,.8)]" />
+              <div className="flex-1">
+                <p className="text-xs font-bold text-[#f1889e]">{t.date}</p>
+                <p className="font-black">{t.title}</p>
+                <p className="text-sm text-[#b8a8a4]">{t.body}</p>
+              </div>
+              <CheckCircle2 className="h-5 w-5 text-[#dca669]" />
+            </div>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Care Plan">
+        <div className="space-y-3">
+          {plan.map(([title, sub]) => (
+            <div key={title} className="flex items-center gap-3 rounded-2xl bg-white/[0.035] p-4">
+              <div className="grid h-10 w-10 place-items-center rounded-2xl bg-[#2a151a] text-[#f1889e]">
+                <Droplets className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-black">{title}</p>
+                <p className="text-xs text-[#b8a8a4]">{sub}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function MentorView() {
+  return (
+    <div className="space-y-7">
+      <Hero title="Welcome back, Steph! ✨" subtitle="Here’s what needs your attention across clients, appointments, and journeys today." />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={Users} label="Active Clients" value="24" />
+        <Metric icon={CalendarDays} label="Appointments Today" value="6" />
+        <Metric icon={CheckCircle2} label="Tasks Due This Week" value="14" />
+        <Metric icon={LineChart} label="Average Progress" value="87%" />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1.2fr_1fr_.9fr]">
+        <Panel title="Today’s Schedule">
+          <div className="space-y-3">
+            {appointments.map((a) => (
+              <div key={a.time} className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div>
+                  <p className="text-sm font-black">{a.time} · {a.name}</p>
+                  <p className="text-xs text-[#b8a8a4]">{a.type}</p>
+                </div>
+                <button className="rounded-full border border-[#e66f8e]/40 px-3 py-1 text-xs font-bold text-[#f1889e]">Check-in</button>
+              </div>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Recent Client Activity">
+          <ClientRows />
+        </Panel>
+
+        <Panel title="Quick Actions" action={false}>
+          <QuickActions />
+        </Panel>
+      </div>
+
+      <JourneyAndPlan />
+    </div>
+  );
+}
+
+function MenteeView() {
+  return (
+    <div className="space-y-7">
+      <Hero title="Business Dashboard" subtitle="A clean operating view for bookings, clients, content, products, and follow-ups." />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={WalletCards} label="Monthly Revenue" value="$4.1K" />
+        <Metric icon={CalendarDays} label="Booked Appts" value="56" />
+        <Metric icon={MessageCircle} label="Messages" value="132" />
+        <Metric icon={ShieldCheck} label="Retention Rate" value="86%" />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
+        <Panel title="Clients Overview">
+          <ClientRows />
+        </Panel>
+        <Panel title="Tasks Due">
+          {["Review photo updates", "Follow up with clients", "Update care plans", "Check-in reminders"].map((t, i) => (
+            <div key={t} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
+              <span className="text-sm font-bold">{t}</span>
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-[#44212a] text-sm font-black text-[#f1889e]">{i + 2}</span>
+            </div>
+          ))}
+        </Panel>
+      </div>
+
+      <Panel title="Content + Client Growth Priorities">
+        <div className="grid gap-4 md:grid-cols-3">
+          {["Post 2 transformation reels", "Add 5 client progress photos", "Send wash-day reminders"].map((x) => (
+            <div key={x} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+              <Sparkles className="mb-3 h-5 w-5 text-[#f1889e]" />
+              <p className="font-bold">{x}</p>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function ClientView() {
+  return (
+    <div className="space-y-7">
+      <Hero title="Hey, Layla! 👋" subtitle="Your hair journey is on track. Here’s your progress, next appointment, and care plan." />
+      <div className="grid gap-5 xl:grid-cols-[1.1fr_.9fr]">
+        <Panel title="Your Progress Overview">
+          <div className="mb-4 flex items-end justify-between">
+            <div>
+              <p className="text-5xl font-black">72%</p>
+              <p className="text-sm text-[#b8a8a4]">Overall progress · +8% this month</p>
+            </div>
+            <Sparkles className="h-8 w-8 text-[#dca669]" />
+          </div>
+          <ProgressBar value={72} />
+        </Panel>
+
+        <Panel title="Next Appointment">
+          <div className="rounded-3xl border border-[#e66f8e]/25 bg-[#241218] p-5">
+            <p className="text-sm text-[#b8a8a4]">May 28, 2025 · 10:00 AM</p>
+            <p className="mt-2 text-2xl font-black">Check-in & Photo Update</p>
+            <p className="mt-2 text-sm text-[#b8a8a4]">Front/back photos, scalp notes, and maintenance plan updates.</p>
+            <button className="mt-5 w-full rounded-2xl bg-gradient-to-r from-[#e66f8e] to-[#b94d68] py-3 font-black">View Details</button>
+          </div>
+        </Panel>
+      </div>
+
+      <JourneyAndPlan />
+
+      <Panel title="Recent Photos">
+        <div className="grid gap-4 sm:grid-cols-3">
+          {["Starter locs", "Budding phase", "Current progress"].map((label) => (
+            <div key={label} className="grid aspect-[4/3] place-items-center rounded-3xl border border-dashed border-[#ffb7c42e] bg-white/[0.04]">
+              <div className="text-center text-[#b8a8a4]">
+                <Camera className="mx-auto mb-3 h-8 w-8 text-[#f1889e]" />
+                <p className="text-sm font-bold">{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Panel>
+    </div>
+  );
+}
+
+function AdminView() {
+  return (
+    <div className="space-y-7">
+      <Hero title="Admin Dashboard" subtitle="Platform-level usage, bookings, revenue, retention, and user activity." />
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Metric icon={Users} label="Total Users" value="52" />
+        <Metric icon={Users} label="Active Clients" value="38" />
+        <Metric icon={Crown} label="Mentors" value="6" />
+        <Metric icon={WalletCards} label="Total Revenue" value="$6.8K" />
+      </div>
+
+      <div className="grid gap-5 xl:grid-cols-2">
+        <Panel title="Analytics Overview">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
+            <p className="text-5xl font-black text-[#f1889e]">72%</p>
+            <p className="mt-2 text-[#b8a8a4]">Average client journey progress</p>
+            <div className="mt-5"><ProgressBar value={72} /></div>
+          </div>
+        </Panel>
+        <Panel title="Recent Activity">
+          {["New client signed up", "Payment received", "Appointment booked", "New mentor added"].map((x, i) => (
+            <div key={x} className="mb-3 flex items-center justify-between rounded-2xl bg-white/[0.035] p-4">
+              <span className="text-sm font-bold">{x}</span>
+              <span className="text-xs text-[#b8a8a4]">{i + 1}h ago</span>
+            </div>
+          ))}
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+export default function DarkDashboard({ initialView = "mentor" }: { initialView?: View }) {
+  const [view, setView] = useState<View>(initialView);
+
+  const content = useMemo(() => {
+    if (view === "mentor") return <MentorView />;
+    if (view === "mentee") return <MenteeView />;
+    if (view === "client") return <ClientView />;
+    return <AdminView />;
+  }, [view]);
+
+  return <Shell view={view} setView={setView}>{content}</Shell>;
+}
