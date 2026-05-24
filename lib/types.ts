@@ -1,5 +1,23 @@
-export type UserRole = "mentor" | "mentee" | "client";
+import { ReactNode } from "react";
 
+export type UserRole = "mentor" | "mentee" | "client" | "admin";
+export type View = UserRole;
+export type WorkTab = "business" | "mentorship";
+
+// Flexible modal — accepts any ReactNode as content.
+// All views use openModal({ title, content }) — no more type strings.
+export type ModalState =
+  | null
+  | {
+      title: string;
+      subtitle?: string;
+      content: ReactNode;
+      size?: "sm" | "md" | "lg";
+    };
+
+export type ModalOpener = (m: ModalState) => void;
+
+// Legacy hair-profile types (kept for Supabase schema compatibility)
 export type ClientHairProfile = {
   id: string;
   mentee_id: string;

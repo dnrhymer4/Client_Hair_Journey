@@ -1,7 +1,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 :root {
   --bg: #070708;
   --text: #fff7f4;
@@ -9,9 +8,7 @@
   --rose: #e66f8e;
   --gold: #dca669;
 }
-
-html,
-body {
+html, body {
   margin: 0;
   background:
     radial-gradient(circle at top right, rgba(230, 111, 142, 0.16), transparent 32rem),
@@ -19,7 +16,24 @@ body {
     #070708;
   color: var(--text);
 }
+* { box-sizing: border-box; }
 
-* {
-  box-sizing: border-box;
+/* ── Skeleton shimmer animation ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1a1011 25%, #2a1519 50%, #1a1011 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+/* ── Smooth view transitions ── */
+.view-enter {
+  animation: fadeUp 0.25s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0);    }
 }
