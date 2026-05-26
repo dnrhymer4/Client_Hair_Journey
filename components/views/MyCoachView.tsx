@@ -2,9 +2,13 @@
 import { useState, CSSProperties } from "react";
 import {
   CheckCircle2, Circle, Target, TrendingUp, BarChart2,
-  CalendarDays, Sparkles, Award, Clock, ChevronDown, ChevronUp,
+  CalendarDays, Award, ChevronDown, ChevronUp,
+  Users, Eye, ExternalLink,
 } from "lucide-react";
-import { AreaChart, Area, ResponsiveContainer, Tooltip, XAxis } from "recharts";
+import {
+  AreaChart, Area, BarChart, Bar,
+  ResponsiveContainer, Tooltip, XAxis,
+} from "recharts";
 import { menteeKia, delta } from "@/lib/demoData";
 import { ModalOpener } from "@/lib/types";
 
@@ -23,12 +27,166 @@ function PBar({ value, color=C.accent }:{ value:number; color?:string }) {
   );
 }
 
-function SectionHeader({ children }:{ children:string }) {
+// Weekly post counts for the bar chart (last 8 weeks, derived from weekly data)
+const WEEKLY_POSTS = [
+  { week:"Apr 6",  posts:2 }, { week:"Apr 13", posts:3 },
+  { week:"Apr 20", posts:2 }, { week:"Apr 27", posts:4 },
+  { week:"May 4",  posts:3 }, { week:"May 11", posts:4 },
+  { week:"May 18", posts:5 }, { week:"May 24", posts:4 },
+];
+
+const PLATFORM_COLORS: Record<string, string> = {
+  Instagram: "#e4405f",
+  Facebook:  "#1877f2",
+  TikTok:    "#00f2ea",
+  Booking:   C.gold,
+};
+
+// ── Social media analytics ────────────────────────────────────────────────────
+function SocialAnalytics() {
+  const viewsD = delta(ME.socialViews, ME.socialViewsPrev);
+  const socials = ME.socials.filter(s => s.platform !== "Booking");
+  const bookingSocial = ME.socials.find(s => s.platform === "Booking");
+
   return (
-    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:14 }}>
-      <div style={{ flex:1, height:1, background:"rgba(255,255,255,.06)" }}/>
-      <span style={{ fontSize:10, fontWeight:700, color:C.dim, textTransform:"uppercase" as const, letterSpacing:".1em", flexShrink:0 }}>{children}</span>
-      <div style={{ flex:1, height:1, background:"rgba(255,255,255,.06)" }}/>
+    <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+      {/* Total social views summary */}
+      <div style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:14, padding:"16px 16px 12px" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
+          <div>
+            <p style={{ fontSize:11, fontWeight:700, color:C.muted, textTransform:"uppercase" as const, letterSpacing:".07em", margin:"0 0 4px" }}>Total Social Views</p>
+            <div style={{ display:"flex", alignItems:"baseline", gap:8 }}>
+              <span style={{ fontSize:28, fontWeight:900, lineHeight:1 }}>{(ME.socialViews / 1000).toFixed(1)}K</span>
+              <span style={{ fontSize:12, fontWeight:700, color:viewsD.positive ? C.success : "#f87171" }}>
+                {viewsD.positive ? "+" : "-"}{viewsD.pct}% vs last month
+              </span>
+            </div>
+          </div>
+          <div style={{ textAlign:"right" as const }}>
+            <p style={{ fontSize:11, color:C.muted, margin:"0 0 2px" }}>Content score</p>
+            <p style={{ fontSize:22, fontWeight:900, color:ME.contentScore >= 70 ? C.success : ME.contentScore >= 50 ? C.gold : C.accent, margin:0 }}>
+              {ME.contentScore}<span style={{ fontSize:13, fontWeight:600, color:C.dim }}>/100</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Posts per week bar chart */}
+        <p style={{ fontSize:10, fontWeight:700, color:C.dim, textTransform:"uppercase" as const, letterSpacing:".07em", margin:"0 0 6px" }}>Posts per week</p>
+        <ResponsiveContainer width="100%" height={70}>
+          <BarChart data={WEEKLY_POSTS} margin={{ top:0, right:0, left:0, bottom:0 }}>
+            <Bar dataKey="posts" fill={C.accent} radius={[3,3,0,0]}/>
+            <XAxis dataKey="week" tick={{ fill:"#6e5a66", fontSize:9 }} tickLine={false} axisLine={false}/>
+            <Tooltip
+              formatter={(v) => [v, "Posts"]}
+              contentStyle={{ background:"#161113", border:"1px solid rgba(255,255,255,.07)", borderRadius:8, fontSize:11 }}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Per-platform cards */}
+      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+        {socials.map(s => {
+          const color = PLATFORM_COLORS[s.platform] ?? C.accent;
+          const follD = s.followersPrev > 0 ? delta(s.followers, s.followersPrev) : null;
+          return (
+            <div key={s.platform} style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:14, padding:14 }}>
+              {/* Platform header */}
+              <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+                  <div style={{ width:32, height:32, borderRadius:9, background:`${color}18`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <Users size={15} style={{ color }}/>
+                  </div>
+                  <div>
+                    <p style={{ fontSize:13, fontWeight:700, margin:0 }}>{s.platform}</p>
+                    <p style={{ fontSize:11, color:C.accent, margin:0 }}>{s.handle}</p>
+                  </div>
+                </div>
+                <a href={`https://${s.url}`} target="_blank" rel="noreferrer" style={{ color:C.dim, display:"flex" }}>
+                  <ExternalLink size={13}/>
+                </a>
+              </div>
+
+              {/* Metrics */}
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:10 }}>
+                <div style={{ background:"#0c0a0b", borderRadius:9, padding:"8px 10px" }}>
+                  <p style={{ fontSize:16, fontWeight:900, lineHeight:1, margin:"0 0 2px" }}>
+                    {s.followers >= 1000 ? `${(s.followers/1000).toFixed(1)}K` : s.followers}
+                  </p>
+                  <p style={{ fontSize:9, color:C.dim, margin:0, textTransform:"uppercase" as const }}>Followers</p>
+                  {follD && (
+                    <p style={{ fontSize:10, fontWeight:700, color:follD.positive ? C.success : "#f87171", margin:"3px 0 0" }}>
+                      {follD.positive ? "+" : "-"}{follD.pct}%
+                    </p>
+                  )}
+                </div>
+                <div style={{ background:"#0c0a0b", borderRadius:9, padding:"8px 10px" }}>
+                  <p style={{ fontSize:16, fontWeight:900, lineHeight:1, margin:"0 0 2px" }}>
+                    {s.views}
+                  </p>
+                  <p style={{ fontSize:9, color:C.dim, margin:0, textTransform:"uppercase" as const }}>Views</p>
+                  <p style={{ fontSize:10, color:C.muted, margin:"3px 0 0" }}>{s.posts} posts</p>
+                </div>
+              </div>
+
+              {/* Follower growth bar */}
+              {follD && (
+                <div>
+                  <div style={{ display:"flex", justifyContent:"space-between", fontSize:10, color:C.dim, marginBottom:4 }}>
+                    <span>Follower growth</span>
+                    <span style={{ color:follD.positive ? C.success : "#f87171", fontWeight:700 }}>
+                      +{s.followers - s.followersPrev} new
+                    </span>
+                  </div>
+                  <PBar value={Math.min(100, ((s.followers - s.followersPrev) / s.followersPrev) * 100 * 5)} color={color}/>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Booking platform views */}
+      {bookingSocial && (
+        <div style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:14, padding:14 }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:32, height:32, borderRadius:9, background:`${C.gold}18`, display:"flex", alignItems:"center", justifyContent:"center" }}>
+                <CalendarDays size={15} style={{ color:C.gold }}/>
+              </div>
+              <div>
+                <p style={{ fontSize:13, fontWeight:700, margin:0 }}>{bookingSocial.platform}</p>
+                <p style={{ fontSize:11, color:C.dim, margin:0 }}>{bookingSocial.handle}</p>
+              </div>
+            </div>
+            <div style={{ textAlign:"right" as const }}>
+              <p style={{ fontSize:20, fontWeight:900, color:C.gold, margin:0 }}>{bookingSocial.views}</p>
+              <p style={{ fontSize:10, color:C.dim, margin:0 }}>profile visits</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Content consistency coaching tip */}
+      <div style={{ background:`${C.accent}08`, border:`1px solid ${C.accent}20`, borderRadius:14, padding:"14px 16px" }}>
+        <p style={{ fontSize:11, fontWeight:700, color:C.accent, textTransform:"uppercase" as const, letterSpacing:".07em", margin:"0 0 8px" }}>
+          Mentor Insight
+        </p>
+        {ME.contentScore < 50 ? (
+          <p style={{ fontSize:12, color:C.muted, margin:0, lineHeight:1.6 }}>
+            Your content score is <strong style={{ color:C.accent }}>{ME.contentScore}/100</strong>. Posting consistency is the #1 driver of organic client growth. Aim for <strong style={{ color:C.text }}>3 posts/week</strong> minimum — even simple before/afters count.
+          </p>
+        ) : ME.contentScore < 75 ? (
+          <p style={{ fontSize:12, color:C.muted, margin:0, lineHeight:1.6 }}>
+            Good momentum at <strong style={{ color:C.gold }}>{ME.contentScore}/100</strong>. Your last reel hit{" "}
+            <strong style={{ color:C.text }}>4.2K views</strong> — double down on transformation reels and client spotlights for the highest reach.
+          </p>
+        ) : (
+          <p style={{ fontSize:12, color:C.muted, margin:0, lineHeight:1.6 }}>
+            Strong content game at <strong style={{ color:C.success }}>{ME.contentScore}/100</strong>! Focus now on converting viewers to bookings — add your booking link in every caption and bio.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -37,7 +195,7 @@ function SectionHeader({ children }:{ children:string }) {
 function BusinessProgress() {
   const revD = delta(ME.revenue, ME.revenuePrev);
   const goalPct = Math.round((ME.revenue / ME.goal) * 100);
-  const clientD = delta(ME.activeClients, ME.activeClientsPrev);
+  const [showSocial, setShowSocial] = useState(true);
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
@@ -48,7 +206,7 @@ function BusinessProgress() {
             <p style={{ fontSize:11, fontWeight:700, color:C.muted, textTransform:"uppercase" as const, letterSpacing:".07em", margin:"0 0 4px" }}>Revenue Progress</p>
             <div style={{ display:"flex", alignItems:"baseline", gap:8 }}>
               <span style={{ fontSize:28, fontWeight:900, lineHeight:1 }}>${ME.revenue.toLocaleString()}</span>
-              <span style={{ fontSize:12, fontWeight:700, color:revD.positive?C.success:"#f87171" }}>{revD.positive?"+":"-"}{revD.pct}% vs last month</span>
+              <span style={{ fontSize:12, fontWeight:700, color:revD.positive ? C.success : "#f87171" }}>{revD.positive ? "+" : "-"}{revD.pct}% vs last month</span>
             </div>
           </div>
           <div style={{ textAlign:"right" as const }}>
@@ -79,9 +237,9 @@ function BusinessProgress() {
       {/* Business health metrics */}
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:10 }}>
         {[
-          { icon:BarChart2,   label:"Business Health", value:String(ME.businessHealth), sub:"/100",          color:ME.businessHealth>=75?C.success:ME.businessHealth>=50?C.gold:C.accent },
-          { icon:TrendingUp,  label:"Content Score",   value:String(ME.contentScore),   sub:"/100",          color:ME.contentScore>=75?C.success:ME.contentScore>=50?C.gold:C.accent },
-          { icon:CalendarDays,label:"Bookings",         value:String(ME.bookings),       sub:`prev ${ME.bookingsPrev}`, color:C.text },
+          { icon:BarChart2,    label:"Business Health", value:String(ME.businessHealth), sub:"/100",             color:ME.businessHealth>=75?C.success:ME.businessHealth>=50?C.gold:C.accent },
+          { icon:TrendingUp,   label:"Content Score",   value:String(ME.contentScore),   sub:"/100",             color:ME.contentScore>=75?C.success:ME.contentScore>=50?C.gold:C.accent },
+          { icon:CalendarDays, label:"Bookings",        value:String(ME.bookings),        sub:`prev ${ME.bookingsPrev}`, color:C.text },
         ].map(s=>(
           <div key={s.label} style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:12, padding:"12px 14px" }}>
             <s.icon size={15} style={{ color:s.color, marginBottom:6 }}/>
@@ -90,6 +248,28 @@ function BusinessProgress() {
             <p style={{ fontSize:10, color:C.muted, margin:"4px 0 0" }}>{s.label}</p>
           </div>
         ))}
+      </div>
+
+      {/* Social media analytics — collapsible section */}
+      <div style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:14, overflow:"hidden" }}>
+        <button
+          onClick={() => setShowSocial(p => !p)}
+          style={{ display:"flex", alignItems:"center", justifyContent:"space-between", width:"100%", padding:"14px 16px", background:"none", border:"none", cursor:"pointer", borderBottom: showSocial ? `1px solid ${C.border}` : "none" }}
+        >
+          <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+            <Eye size={15} style={{ color:C.accent }}/>
+            <span style={{ fontSize:13, fontWeight:700, color:C.text }}>Social Media Analytics</span>
+            <span style={{ fontSize:10, fontWeight:700, color:C.success, background:"rgba(52,211,153,.12)", padding:"2px 7px", borderRadius:20 }}>
+              +{delta(ME.socialViews, ME.socialViewsPrev).pct}% views
+            </span>
+          </div>
+          {showSocial ? <ChevronUp size={14} style={{ color:C.dim }}/> : <ChevronDown size={14} style={{ color:C.dim }}/>}
+        </button>
+        {showSocial && (
+          <div style={{ padding:"0 16px 16px" }}>
+            <SocialAnalytics/>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -112,9 +292,7 @@ function GoalsPanel() {
                   <span style={{ fontSize:10, color:C.dim }}>Target: {g.targetDate}</span>
                 </div>
               </div>
-              <div style={{ textAlign:"right" as const, flexShrink:0 }}>
-                <span style={{ fontSize:20, fontWeight:900, color }}>{g.progress}%</span>
-              </div>
+              <span style={{ fontSize:20, fontWeight:900, color, flexShrink:0 }}>{g.progress}%</span>
             </div>
             <PBar value={g.progress} color={`linear-gradient(90deg,${color},${color}88)`}/>
             <div style={{ display:"flex", justifyContent:"space-between", marginTop:6 }}>
@@ -133,23 +311,18 @@ function TasksPanel() {
   const completed = ME.actionItems.filter(a=>a.status==="done");
   const pending   = ME.actionItems.filter(a=>a.status==="open");
   const [showDone, setShowDone] = useState(false);
-
   const priBg:Record<string,string> = { high:"rgba(248,113,113,.15)", medium:"rgba(212,149,106,.15)", low:"rgba(52,211,153,.1)" };
   const priFg:Record<string,string> = { high:"#f87171", medium:C.gold, low:C.success };
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-      {/* Pending to-dos */}
       <div style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 16px" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:12 }}>
           <p style={{ fontSize:13, fontWeight:700, margin:0 }}>To-Do</p>
           <span style={{ fontSize:11, fontWeight:700, color:C.accent, background:`${C.accent}15`, padding:"2px 8px", borderRadius:20 }}>{pending.length} remaining</span>
         </div>
         {pending.length === 0
-          ? <div style={{ textAlign:"center" as const, padding:"16px 0", color:C.success }}>
-              <CheckCircle2 size={28} style={{ margin:"0 auto 8px" }}/>
-              <p style={{ fontSize:13, fontWeight:700, margin:0 }}>All tasks complete! 🎉</p>
-            </div>
+          ? <div style={{ textAlign:"center" as const, padding:"16px 0", color:C.success }}><CheckCircle2 size={28} style={{ margin:"0 auto 8px" }}/><p style={{ fontSize:13, fontWeight:700, margin:0 }}>All tasks complete! 🎉</p></div>
           : pending.map(a=>(
             <div key={a.id} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"10px 0", borderBottom:`1px solid rgba(255,255,255,.04)` }}>
               <Circle size={15} style={{ color:C.dim, flexShrink:0, marginTop:2 }}/>
@@ -160,15 +333,11 @@ function TasksPanel() {
                   <span style={{ fontSize:10, color:a.source==="mentor"?"#a78bfa":C.muted }}>{a.source==="mentor"?"From mentor":"Self-set"}</span>
                 </div>
               </div>
-              <span style={{ fontSize:9.5, fontWeight:700, padding:"2px 7px", borderRadius:20, background:priBg[a.priority], color:priFg[a.priority], flexShrink:0 }}>
-                {a.priority}
-              </span>
+              <span style={{ fontSize:9.5, fontWeight:700, padding:"2px 7px", borderRadius:20, background:priBg[a.priority], color:priFg[a.priority], flexShrink:0 }}>{a.priority}</span>
             </div>
           ))
         }
       </div>
-
-      {/* Completed — collapsible */}
       {completed.length > 0 && (
         <div style={{ background:"rgba(52,211,153,.06)", border:"1px solid rgba(52,211,153,.15)", borderRadius:14, padding:"14px 16px" }}>
           <button onClick={()=>setShowDone(p=>!p)} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", width:"100%", background:"none", border:"none", cursor:"pointer", padding:0, marginBottom:showDone?12:0 }}>
@@ -199,7 +368,6 @@ function SessionsPanel() {
   const completed = ME.coachingSessions.filter(s=>s.status==="completed");
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
-      {/* Next session */}
       {upcoming.map(s=>(
         <div key={s.id} style={{ background:`${C.accent}10`, border:`1px solid ${C.accent}25`, borderRadius:14, padding:"14px 16px" }}>
           <p style={{ fontSize:10, fontWeight:700, color:C.accent, textTransform:"uppercase" as const, letterSpacing:".07em", margin:"0 0 6px" }}>Upcoming Session</p>
@@ -215,8 +383,6 @@ function SessionsPanel() {
           </div>
         </div>
       ))}
-
-      {/* Past sessions with wins */}
       {completed.slice(0,2).map(s=>(
         <div key={s.id} style={{ background:C.card2, border:`1px solid ${C.border}`, borderRadius:14, padding:"14px 16px" }}>
           <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:10 }}>
@@ -257,20 +423,17 @@ function SessionsPanel() {
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function MyCoachView({ openModal }: { openModal: ModalOpener }) {
   const [section, setSection] = useState<"progress"|"tasks"|"goals"|"sessions">("progress");
-
   const tabs: { key: typeof section; label: string; icon: React.ElementType }[] = [
-    { key:"progress", label:"Progress",  icon:TrendingUp  },
-    { key:"tasks",    label:"Tasks",     icon:CheckCircle2 },
-    { key:"goals",    label:"Goals",     icon:Target       },
-    { key:"sessions", label:"Sessions",  icon:CalendarDays },
+    { key:"progress", label:"Progress",  icon:TrendingUp   },
+    { key:"tasks",    label:"Tasks",     icon:CheckCircle2  },
+    { key:"goals",    label:"Goals",     icon:Target        },
+    { key:"sessions", label:"Sessions",  icon:CalendarDays  },
   ];
-
   const completedCount = ME.actionItems.filter(a=>a.status==="done").length;
   const totalCount     = ME.actionItems.length;
 
   return (
     <div style={{ display:"flex", flexDirection:"column", height:"100%", minHeight:0 }}>
-      {/* Header */}
       <div style={{ padding:"14px 20px 0", borderBottom:`1px solid rgba(255,255,255,.06)`, flexShrink:0 }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-end", marginBottom:14 }}>
           <div>
@@ -279,13 +442,11 @@ export default function MyCoachView({ openModal }: { openModal: ModalOpener }) {
               {ME.businessName} · Next session: {ME.coachingSessions.find(s=>s.status==="upcoming")?.date ?? "TBD"}
             </p>
           </div>
-          {/* Task progress pill */}
           <div style={{ display:"flex", alignItems:"center", gap:8, background:C.card, border:`1px solid ${C.border}`, borderRadius:20, padding:"6px 12px", marginBottom:14 }}>
             <CheckCircle2 size={13} style={{ color:C.success }}/>
             <span style={{ fontSize:12, fontWeight:700 }}>{completedCount}/{totalCount} tasks done</span>
           </div>
         </div>
-        {/* Tabs */}
         <div style={{ display:"flex", gap:2 }}>
           {tabs.map(t=>(
             <button key={t.key} onClick={()=>setSection(t.key)}
@@ -295,8 +456,6 @@ export default function MyCoachView({ openModal }: { openModal: ModalOpener }) {
           ))}
         </div>
       </div>
-
-      {/* Content */}
       <div style={{ flex:1, overflowY:"auto", padding:"20px" }}>
         {section === "progress"  && <BusinessProgress/>}
         {section === "tasks"     && <TasksPanel/>}
