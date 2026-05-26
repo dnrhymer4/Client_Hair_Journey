@@ -38,12 +38,18 @@ const Ctx = createContext<AuthCtx>({
 });
 
 async function fetchProfile(userId: string): Promise<UserProfile | null> {
-  const { data } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
-  return data as UserProfile | null;
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+    if (error) { console.warn("fetchProfile error:", error.message); return null; }
+    return data as UserProfile;
+  } catch (e) {
+    console.warn("fetchProfile threw:", e);
+    return null;
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -61,13 +67,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) await loadProfile(session.user);
-      setLoading(false);
-    });
+    // Safety valve — never stay stuck longer than 6 seconds
+    const timeout = setTimeout(() => setLoading(false), 6000);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+    supabase.auth.getSession()
+      .then(async ({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        if (session?.user) await loadProfile(session.user);
+      })
+      .catch((e) => console.warn("getSession error:", e))
+      .finally(() => {
+        clearTimeout(timeout);
+        setLoading(false);
+      });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         await loadProfile(session.user);
@@ -77,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); clearTimeout(timeout); };
   }, []);
 
   const signOut = async () => {
