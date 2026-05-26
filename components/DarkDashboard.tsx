@@ -8,6 +8,7 @@ import BusinessDashboard from "@/components/views/BusinessDashboard";
 import ClientsView from "@/components/views/ClientsView";
 import AppointmentsView from "@/components/views/AppointmentsView";
 import MentorshipView from "@/components/views/MentorshipView";
+import MyCoachView from "@/components/views/MyCoachView";
 import AnalyticsView from "@/components/views/AnalyticsView";
 import ClientPortal from "@/components/views/ClientPortal";
 import SettingsView from "@/components/views/SettingsView";
@@ -50,7 +51,7 @@ export default function DarkDashboard() {
       case "client-portal":  return <ClientPortal openModal={openModal} />;
       case "clients":        return <ClientsView openModal={openModal} role={bRole} />;
       case "appointments":   return <AppointmentsView openModal={openModal} role={bRole} />;
-      case "mentorship":     return <MentorshipView openModal={openModal} />;
+      case "mentorship":     return effectiveRole === "mentee" ? <MyCoachView openModal={openModal} /> : <MentorshipView openModal={openModal} />;
       case "analytics":      return <AnalyticsView openModal={openModal} />;
       case "settings":       return <SettingsView openModal={openModal} />;
       default:               return <BusinessDashboard openModal={openModal} role={bRole} />;
