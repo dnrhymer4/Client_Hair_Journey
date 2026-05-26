@@ -40,14 +40,19 @@ export default function DarkDashboard() {
   const { role } = useAuth();
   const [viewAs, setViewAs]   = useState<AppRole | null>(null);
   const effectiveRole: AppRole = (role === "admin" && viewAs) ? viewAs : role;
-  const [view, setView]        = useState<View>(defaultView(role));
+  // Don't initialise from role — role isn't loaded yet at mount.
+  // renderView handles the per-role default when view === "dashboard".
+  const [view, setView]        = useState<View>("dashboard");
   const [modal, setModal]      = useState<ModalState>(null);
   const openModal: ModalOpener = m => setModal(m);
   const bRole = effectiveRole === "mentee" ? "mentee" : "mentor";
 
   function renderView() {
     if (effectiveRole === "client") return <ClientPortal openModal={openModal} />;
-    switch (view) {
+    // Resolve per-role landing page when sitting on the generic "dashboard" view
+    const activeView: View =
+      view === "dashboard" && effectiveRole === "admin" ? "analytics" : view;
+    switch (activeView) {
       case "client-portal":  return <ClientPortal openModal={openModal} />;
       case "clients":        return <ClientsView openModal={openModal} role={bRole} />;
       case "appointments":   return <AppointmentsView openModal={openModal} role={bRole} />;
