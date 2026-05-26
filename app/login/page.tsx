@@ -35,10 +35,11 @@ export default function LoginPage() {
 
   async function handleGoogleSignIn() {
     setError(""); setGoogleLoading(true);
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${base}/auth/callback`,
         queryParams: { access_type: "offline", prompt: "consent" },
       },
     });
