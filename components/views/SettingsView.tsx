@@ -29,7 +29,7 @@ function SectionTitle({ children }:{ children:string }) {
   return <div style={{ fontSize:14, fontWeight:800, color:C.text, marginBottom:14, paddingBottom:10, borderBottom:`1px solid rgba(255,255,255,.06)` }}>{children}</div>;
 }
 
-export default function SettingsView({ openModal }:{ openModal:ModalOpener }) {
+export default function SettingsView({ openModal, role="mentor" }:{ openModal:ModalOpener; role?:"mentor"|"mentee" }) {
   const [notifs, setNotifs] = useState({ email:true, sms:false, apptReminders:true, progressAlerts:true, newClients:true, sessionReminders:false });
   const toggle = (k:keyof typeof notifs) => () => setNotifs(p=>({ ...p, [k]:!p[k] }));
 

@@ -57,8 +57,8 @@ export default function DarkDashboard() {
       case "clients":        return <ClientsView openModal={openModal} role={bRole} />;
       case "appointments":   return <AppointmentsView openModal={openModal} role={bRole} />;
       case "mentorship":     return effectiveRole === "mentee" ? <MyCoachView openModal={openModal} /> : <MentorshipView openModal={openModal} />;
-      case "analytics":      return <AnalyticsView openModal={openModal} />;
-      case "settings":       return <SettingsView openModal={openModal} />;
+      case "analytics":      return <AnalyticsView openModal={openModal} role={bRole} />;
+      case "settings":       return <SettingsView openModal={openModal} role={bRole} />;
       default:               return <BusinessDashboard openModal={openModal} role={bRole} />;
     }
   }

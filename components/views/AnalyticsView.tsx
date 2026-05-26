@@ -40,7 +40,7 @@ const TOP_PLANS = [
   { name:"Length Retention Plan", pct:85 },
 ];
 
-export default function AnalyticsView({ openModal }:{ openModal:ModalOpener }) {
+export default function AnalyticsView({ openModal, role="mentor" }:{ openModal:ModalOpener; role?:"mentor"|"mentee" }) {
   const revD = delta(adminStats.totalRevenue, adminStats.totalRevenuePrev);
 
   return (
