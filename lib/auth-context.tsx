@@ -37,6 +37,13 @@ const Ctx = createContext<AuthCtx>({
   signOut: async () => {}, refreshProfile: async () => {},
 });
 
+/** Role is stamped into app_metadata (JWT) by the DB trigger — always available without a DB query. */
+function roleFromUser(user: User | null): AppRole {
+  const r = user?.app_metadata?.role ?? user?.user_metadata?.role;
+  if (r === "mentor" || r === "mentee" || r === "admin") return r;
+  return "client";
+}
+
 async function fetchProfile(userId: string): Promise<UserProfile | null> {
   try {
     const { data, error } = await supabase
@@ -44,7 +51,7 @@ async function fetchProfile(userId: string): Promise<UserProfile | null> {
       .select("*")
       .eq("id", userId)
       .single();
-    if (error) { console.warn("fetchProfile error:", error.message); return null; }
+    if (error) { console.warn("fetchProfile:", error.message); return null; }
     return data as UserProfile;
   } catch (e) {
     console.warn("fetchProfile threw:", e);
@@ -67,7 +74,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    // Safety valve — never stay stuck longer than 6 seconds
     const timeout = setTimeout(() => setLoading(false), 6000);
 
     supabase.auth.getSession()
@@ -75,19 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(session?.user ?? null);
         if (session?.user) await loadProfile(session.user);
       })
-      .catch((e) => console.warn("getSession error:", e))
-      .finally(() => {
-        clearTimeout(timeout);
-        setLoading(false);
-      });
+      .catch(e => console.warn("getSession:", e))
+      .finally(() => { clearTimeout(timeout); setLoading(false); });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await loadProfile(session.user);
-      } else {
-        setProfile(null);
-      }
+      if (session?.user) await loadProfile(session.user);
+      else setProfile(null);
       setLoading(false);
     });
 
@@ -96,11 +96,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
+    setUser(null); setProfile(null);
   };
 
-  const role: AppRole = profile?.role ?? "client";
+  // Role priority: profile DB row → JWT app_metadata → "client"
+  const role: AppRole = profile?.role ?? roleFromUser(user);
 
   return (
     <Ctx.Provider value={{ user, profile, role, loading, signOut, refreshProfile }}>
