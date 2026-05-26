@@ -62,7 +62,7 @@ export default function DarkDashboard() {
       {role === "admin" && <ViewAsBanner viewAs={viewAs} setViewAs={setViewAs} />}
       <div style={{ display:"flex", height: role === "admin" ? "calc(100vh - 37px)" : "100vh" }}>
         <Sidebar view={view} setView={setView} role={effectiveRole} />
-        <main style={{ flex:1, overflow:"hidden" }}>{renderView()}</main>
+        <main style={{ flex:1, overflow:"hidden", display:"flex", flexDirection:"column" }}>{renderView()}</main>
       </div>
       <AppModal modal={modal} close={() => setModal(null)} />
     </div>
